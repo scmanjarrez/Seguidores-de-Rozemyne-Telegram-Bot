@@ -72,7 +72,8 @@ def weekly(update, context):
     else:
         msg = ["Los libros que se imprimirán esta semana son:\n"]
         chapters = db.new_chapters()
-        for idx, (ch_title, ch_url, ch_available) in enumerate(chapters):
+        for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
+                chapters):
             msg.append(
                 f"<b>{ch_title}:</b> {_available(ch_available, ch_url)}")
         ut.send(update, "\n".join(msg))
