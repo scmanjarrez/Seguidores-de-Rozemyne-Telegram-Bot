@@ -1,3 +1,14 @@
+# custom
+.idea
+server/
+diptico.db
+diptico.sql
+.apikey
+.adminid
+.trackings
+pyschtappe/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
