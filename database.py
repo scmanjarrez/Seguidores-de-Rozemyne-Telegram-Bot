@@ -92,7 +92,10 @@ def unfinished_part():
             cur.execute('SELECT part, volume, title, url '
                         'FROM parts '
                         'WHERE finished = 0')
-            return cur.fetchone()[0]
+            ret = cur.fetchone()
+            if ret is not None:
+                ret = ret[0]
+            return ret
 
 
 def add_part(part, volume, title, url):

@@ -70,7 +70,7 @@ def weekly(update, context):
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        msg = ["Los libros de esta semana son:\n"]
+        msg = ["Los libros que se imprimirán esta semana son:\n"]
         chapters = db.new_chapters()
         for idx, (ch_title, ch_url, ch_available) in enumerate(chapters):
             msg.append(

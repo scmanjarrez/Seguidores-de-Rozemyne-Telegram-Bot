@@ -57,13 +57,23 @@ def not_started(update):
     send(update, "Envía /start antes de continuar.")
 
 
+def _remove_job(queue, name):
+    current_jobs = queue.get_jobs_by_name(name)
+    if current_jobs:
+        for job in current_jobs:
+            job.schedule_removal()
+            print(f"eliminando {name}")
+    else:
+        print(f"No job named {name}")
+
+
 def notify_callback(context):
     uid, msg = context.job.context
     send_bot(context.bot, uid, msg)
 
 
 def notify_titles(queue, chapters):
-    msg = ["Los libros de esta semana son:\n"]
+    msg = ["Los libros que se imprimirán esta semana son:\n"]
     for ch_title in chapters:
         msg.append(f"{ch_title}\n")
 
@@ -75,7 +85,8 @@ def notify_titles(queue, chapters):
             cnt = USERS_TO_NOTIFY
             time += TIME_BETWEEN_NOTIFY
         queue.run_once(notify_callback, time,
-                       context=(uid, "".join(msg)), name=f"{uid}: {msg[:15]}")
+                       context=(uid, "\n".join(msg)),
+                       name=f"{uid}: {msg[:15]}")
         cnt -= 1
 
 
@@ -84,7 +95,7 @@ def url(text, url):
 
 
 def notify_available(queue, chapters):
-    msg = ["Se han liberado los capitulos:\n"]
+    msg = ["Ya se han impreso los siguientes libros:\n"]
     for ch_title, ch_url in chapters:
         msg.append(url(ch_title, ch_url))
 
@@ -96,7 +107,8 @@ def notify_available(queue, chapters):
             cnt = USERS_TO_NOTIFY
             time += TIME_BETWEEN_NOTIFY
         queue.run_once(notify_callback, time,
-                       context=(uid, msg), name=f"{uid}: {msg[:15]}")
+                       context=(uid, "\n".join(msg)),
+                       name=f"{uid}: {msg[:15]}")
         cnt -= 1
 
 
@@ -158,15 +170,6 @@ def scrape_index(empty=False):
                 print(f"No match: {txt}")
 
 
-def _remove_job(queue, name):
-    current_jobs = queue.get_jobs_by_name(name)
-    if current_jobs:
-        for job in current_jobs:
-            job.schedule_removal()
-    else:
-        print(f"No job named {name}")
-
-
 def titles_callback(context):
     queue = context.job.context
     unfinished = db.unfinished_part()
@@ -184,12 +187,12 @@ def titles_callback(context):
             for cur in current_chap:
                 ch_part, ch_volume, ch_title, _, _ = cur
                 db.unset_new(ch_part, ch_volume, ch_title)
-            notify = []
+            new_chap = []
             for ch_title, ch_url in scraped_chap:
                 if not db.chapter_cached(part, volume, ch_title):
                     db.add_chapter(part, volume, ch_title, ch_url)
-                    notify.append(ch_title)
-            notify_titles(queue, notify)
+                    new_chap.append(ch_title)
+            notify_titles(queue, new_chap)
 
 
 def availability_callback(context):
@@ -199,13 +202,13 @@ def availability_callback(context):
 
 def tuesday_callback(context):
     queue = context.job.context
-    queue.run_repeating(titles_callback, 1 * 60 * 60, 0,
+    queue.run_repeating(titles_callback, 1 * 60 * 60, 1,
                         context=queue, name='tuesday_hourly')
 
 
 def friday_callback(context):
     queue = context.job.context
-    queue.run_repeating(availability_callback, 1 * 60 * 60, 0,
+    queue.run_repeating(availability_callback, 1 * 60 * 60, 1,
                         context=queue, name='friday_hourly')
 
 
@@ -214,5 +217,5 @@ def check_weekly(queue):
     queue.run_daily(tuesday_callback, noon, days=(1,),
                     context=queue, name='tuesday_weekly')
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
-    queue.run_daily(friday_callback, midnight, days=(1,),
-                    context=queue, name='friday_weekly')
+    queue.run_daily(friday_callback, midnight, days=(5,),
+                    context=queue, name='sunday_weekly')
