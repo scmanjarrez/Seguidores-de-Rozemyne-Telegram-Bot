@@ -54,7 +54,9 @@ def edit(update, msg, reply_markup):
 
 
 def not_started(update):
-    send(update, "Envía /start antes de continuar.")
+    send(update,
+         "Solicita la ciudadanía de Ehrenfest con /start "
+         "antes de continuar.")
 
 
 def _remove_job(queue, name):
@@ -62,7 +64,6 @@ def _remove_job(queue, name):
     if current_jobs:
         for job in current_jobs:
             job.schedule_removal()
-            print(f"eliminando {name}")
     else:
         print(f"No job named {name}")
 
