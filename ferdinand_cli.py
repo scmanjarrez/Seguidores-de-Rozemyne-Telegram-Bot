@@ -6,22 +6,23 @@ HELP = (
     "Esto es lo que puedo hacer por ti:"
     "\n\n"
 
-    "❔ /menu - Interactuar usando una interfaz gráfica. <b>[beta]</b>"
+    "❔ /menu - Interactúa con el bot mediante botones. <b>[beta]</b>"
     "\n\n"
 
-    "❔ /semanal - Libros semanales (se actualiza cada martes)."
+    "❔ /semanal - Libros que se imprimen cada semana "
+    "(se actualiza cada martes)."
     "\n"
     "❔ /biblioteca - Lista de libros en la biblioteca."
     "\n"
     "❔ /estanteria <code>parte volúmen</code> - "
     "Lista de libros en la estantería."
     "\n"
-    "❔ /ordonnanz - Activa/desactiva la ordonnanz."
+    "❔ /ordonnanz - Permite/prohíbe el uso de ordonnanz."
     "\n\n"
 
-    "❔ /ayuda - Lista de comandos."
+    "❔ /ayuda - Pide ayuda a Ferdinand."
     "\n"
-    "❔ /parar - Elimina tu información del bot."
+    "❔ /parar - Renuncia a tu ciudadanía de Ehrenfest."
     "\n\n"
 )
 
