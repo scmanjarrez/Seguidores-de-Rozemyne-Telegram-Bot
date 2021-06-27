@@ -44,6 +44,14 @@ def setup_handlers(dispatch, job_queue):
                                    filters=~Filters.update.edited_message)
     dispatch.add_handler(start_handler)
 
+    stop_handler = CommandHandler('parar', cli.stop,
+                                  filters=~Filters.update.edited_message)
+    dispatch.add_handler(stop_handler)
+
+    help_handler = CommandHandler('ayuda', cli.bot_help,
+                                  filters=~Filters.update.edited_message)
+    dispatch.add_handler(help_handler)
+
     menu_handler = CommandHandler('menu', gui.menu,
                                   filters=~Filters.update.edited_message)
     dispatch.add_handler(menu_handler)
