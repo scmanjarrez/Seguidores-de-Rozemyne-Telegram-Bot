@@ -54,7 +54,6 @@ def main_menu(update):
 def library_menu(update):
     kb = [button([("« Volver al Templo", 'main_menu')])]
     parts = db.total_parts()
-    print(parts)
     for idx, (part, title) in enumerate(parts):
         kb.insert(idx, button([(f"Parte {part}: {title}", f'part_{part}')]))
     ut.edit(update, "La Biblioteca", InlineKeyboardMarkup(kb))
@@ -83,7 +82,8 @@ def volume_menu(update, part, volume):
 def weekly_menu(update):
     kb = [button([("« Volver al Templo", 'main_menu')])]
     chapters = db.new_chapters()
-    for idx, (ch_title, ch_url, ch_available) in enumerate(chapters):
+    for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
+            chapters):
         kb.insert(idx,
                   button_url([(f"{ch_title}: {_available(ch_available)}",
                                ch_url)]))
