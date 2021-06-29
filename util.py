@@ -53,10 +53,25 @@ def edit(update, msg, reply_markup):
             traceback.print_stack()
 
 
+def _msg_start(update):
+    uid = update.effective_message.chat.id
+    if uid < 0:
+        msg = ("Solicita que se anexe tu provincia a Ehrenfest "
+               "con /start antes de continuar.")
+    else:
+        msg = ("Solicita la ciudadanía de Ehrenfest "
+               "con /start antes de continuar.")
+    return msg
+
+
 def not_started(update):
-    send(update,
-         "Solicita la ciudadanía de Ehrenfest con /start "
-         "antes de continuar.")
+    msg = _msg_start(update)
+    send(update, msg)
+
+
+def not_started_gui(update):
+    msg = _msg_start(update)
+    edit(update, msg, None)
 
 
 def _remove_job(queue, name):
