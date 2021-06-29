@@ -82,6 +82,7 @@ if __name__ == '__main__':
 
     with open(".apikey", 'r') as f:
         API_KEY = f.read().strip()
+
     db.setup_db()
     if not os.path.exists(db.DB):
         ut.scrape_index(empty=True)

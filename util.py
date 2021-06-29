@@ -76,7 +76,7 @@ def notify_callback(context):
 def notify_titles(queue, chapters):
     msg = ["Los libros que se imprimirán esta semana son:\n"]
     for ch_title in chapters:
-        msg.append(f"{ch_title}\n")
+        msg.append(f"<b>{ch_title}</b>")
 
     users = db.all_users_notify()
     cnt = USERS_TO_NOTIFY
@@ -92,7 +92,7 @@ def notify_titles(queue, chapters):
 
 
 def url(text, url):
-    return f"<a href='{url}'>{text}</a>"
+    return f"<b><a href='{url}'>{text}</a></b>"
 
 
 def notify_available(queue, chapters):
@@ -214,7 +214,7 @@ def friday_callback(context):
 
 
 def check_weekly(queue):
-    noon = datetime.time(hour=12, tzinfo=pytz.timezone('Europe/Madrid'))
+    noon = datetime.time(hour=7, tzinfo=pytz.timezone('Europe/Madrid'))
     queue.run_daily(tuesday_callback, noon, days=(1,),
                     context=queue, name='tuesday_weekly')
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))

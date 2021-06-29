@@ -57,12 +57,21 @@ def _to_volume(volume):
 
 def start(update, context):
     uid = update.effective_message.chat.id
-    fname = update.effective_message.chat.first_name
-    msg = f"<b>{fname}</b>, ya eres un noble de Ehrenfest."
+    if uid < 0:  # group
+        fname = update.effective_message.chat.title
+        msg = "Esta provincia ya pertenece a Ehrenfest."
+    else:
+        fname = update.effective_message.chat.first_name
+        msg = f"<b>{fname}</b>, ya eres un noble de Ehrenfest."
+
     if not db.cached(uid):
         db.add_user(uid)
-        msg = (f"<b>{fname}</b>, acabas de ser bautizado "
-               f"como un noble de Ehrenfest.\n\n{HELP}")
+        if uid < 0:
+            msg = (f"La provincia <b><i>{fname}</i></b> "
+                   f"acaba de añadirse a Ehrenfest.\n\n{HELP}")
+        else:
+            msg = (f"<b>{fname}</b>, acabas de ser bautizado "
+                   f"como un noble de Ehrenfest.\n\n{HELP}")
     ut.send(update, msg)
 
 

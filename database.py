@@ -25,8 +25,7 @@ def setup_db():
                     url TEXT,
                     new INTEGER DEFAULT 1,
                     available INTEGER DEFAULT 0,
-                    FOREIGN KEY (part) REFERENCES parts(part),
-                    FOREIGN KEY (volume) REFERENCES parts(volume),
+                    FOREIGN KEY (part, volume) REFERENCES parts(part, volume),
                     PRIMARY KEY (part, volume, title)
                 );
 
@@ -92,10 +91,7 @@ def unfinished_part():
             cur.execute('SELECT part, volume, title, url '
                         'FROM parts '
                         'WHERE finished = 0')
-            ret = cur.fetchone()
-            if ret is not None:
-                ret = ret[0]
-            return ret
+            return cur.fetchone()
 
 
 def add_part(part, volume, title, url):
