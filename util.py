@@ -133,7 +133,8 @@ def check_available(queue):
     available = []
     for ch_part, ch_volume, ch_title, ch_url in chapters:
         resp = req.get(ch_url)
-        if resp.status_code == req.codes.ok:
+        soup = bs.BeautifulSoup(resp.text, 'lxml')
+        if not soup.find_all("div", {"class": "patreon-campaign-banner"}):
             db.set_available(ch_part, ch_volume, ch_title)
             available.append((ch_title, ch_url))
     if available:
