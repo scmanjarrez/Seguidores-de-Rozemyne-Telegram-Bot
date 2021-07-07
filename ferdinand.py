@@ -72,6 +72,10 @@ def setup_handlers(dispatch, job_queue):
                                        filters=~Filters.update.edited_message)
     dispatch.add_handler(ordonnanz_handler)
 
+    update_handler = CommandHandler('forceupdate', cli.force_check,
+                                    filters=~Filters.update.edited_message)
+    dispatch.add_handler(update_handler)
+
     dispatch.add_handler(CallbackQueryHandler(button_handler))
 
 

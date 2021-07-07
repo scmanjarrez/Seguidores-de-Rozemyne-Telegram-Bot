@@ -230,7 +230,7 @@ def friday_callback(context):
 
 
 def check_weekly(queue):
-    noon = datetime.time(hour=7, tzinfo=pytz.timezone('Europe/Madrid'))
+    noon = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
     queue.run_daily(tuesday_callback, noon, days=(1,),
                     context=queue, name='tuesday_weekly')
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))

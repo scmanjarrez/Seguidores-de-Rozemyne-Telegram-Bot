@@ -151,3 +151,11 @@ def stop(update, context):
         ut.blocked(uid)
         msg = "Se te ha eliminado la ciudadanía de Ehrenfest."
     ut.send(update, msg)
+
+
+def force_check(update, context):
+    uid = update.effective_message.chat.id
+    with open('.adminid', 'r') as f:
+        admin = int(f.read().strip())
+    if uid == admin:
+        ut.check_available(context.job_queue)
