@@ -5,6 +5,7 @@ diptico.db
 diptico.sql
 .apikey
 .adminid
+.publishid
 .trackings
 pyschtappe/
 

@@ -159,3 +159,17 @@ def force_check(update, context):
         admin = int(f.read().strip())
     if uid == admin:
         ut.check_available(context.job_queue)
+
+
+def publish_translation(update, context):
+    uid = update.effective_message.chat.id
+    with open('.publishid', 'r') as f:
+        admin, group = map(int, f.read().splitlines())
+    if uid == admin:
+        if len(context.args) != 1:
+            msg = "Recuerda enviar la URL del canal como argumento."
+        else:
+            msg = (f"Has recibido la bendición de Mestionora, "
+                   f"ahora puedes leer las historias de "
+                   f"{ut.url('esta semana', context.args[0])}.")
+        ut.send_bot(context.bot, group, msg)

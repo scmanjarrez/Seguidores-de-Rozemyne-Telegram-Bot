@@ -25,27 +25,27 @@ def blocked(uid):
     db.del_user(uid)
 
 
-def send(update, msg, quote=True, reply_markup=None):
+def send(update, msg, quote=True, reply_markup=None, disable_preview=True):
     try:
         update.message.reply_html(msg, quote=quote, reply_markup=reply_markup,
-                                  disable_web_page_preview=True)
+                                  disable_web_page_preview=disable_preview)
     except Unauthorized:
         blocked(update.effective_message.chat.id)
 
 
-def send_bot(bot, uid, msg, reply_markup=None):
+def send_bot(bot, uid, msg, reply_markup=None, disable_preview=True):
     try:
         bot.send_message(uid, msg, ParseMode.HTML, reply_markup=reply_markup,
-                         disable_web_page_preview=True)
+                         disable_web_page_preview=disable_preview)
     except Unauthorized:
         blocked(uid)
 
 
-def edit(update, msg, reply_markup):
+def edit(update, msg, reply_markup, disable_preview=True):
     try:
         update.callback_query.edit_message_text(msg, ParseMode.HTML,
                                                 reply_markup=reply_markup,
-                                                disable_web_page_preview=True)
+                                                disable_web_page_preview=disable_preview)  # noqa
     except BadRequest as br:
         if not str(br).startswith("Message is not modified:"):
             print(f"***  Exception caught in edit "

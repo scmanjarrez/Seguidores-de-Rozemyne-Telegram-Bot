@@ -76,6 +76,10 @@ def setup_handlers(dispatch, job_queue):
                                     filters=~Filters.update.edited_message)
     dispatch.add_handler(update_handler)
 
+    publish_handler = CommandHandler('publicar', cli.publish_translation,
+                                     filters=~Filters.update.edited_message)
+    dispatch.add_handler(publish_handler)
+
     dispatch.add_handler(CallbackQueryHandler(button_handler))
 
 
