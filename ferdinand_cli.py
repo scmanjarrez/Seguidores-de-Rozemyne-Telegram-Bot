@@ -138,12 +138,15 @@ def ordonnanz(update, context):
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        db.toggle_notifications(uid)
-        if db.notifications(uid) == 1:
-            msg = ("Se te enviará una Ordonnanz cada vez "
-                   "que se imprima un nuevo libro.")
+        if uid < 0:
+            msg = ("No es posible renunciar a las Ordonnanz del Aub.")
         else:
-            msg = "Ya no se te enviarán más Ordonnanz."
+            db.toggle_notifications(uid)
+            if db.notifications(uid) == 1:
+                msg = ("Se te enviará una Ordonnanz cada vez "
+                       "que se imprima un nuevo libro.")
+            else:
+                msg = "Ya no se te enviarán más Ordonnanz."
         ut.send(update, msg)
 
 

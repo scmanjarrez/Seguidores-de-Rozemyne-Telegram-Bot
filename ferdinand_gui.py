@@ -101,10 +101,12 @@ def weekly_menu(update):
 
 def notifications_menu(update):
     uid = update.effective_message.chat.id
-    notification_icon = '🔔' if db.notifications(uid) == 1 else '🔕'
-    kb = [button([(f"Recibir Ordonnanz: {notification_icon}",
-                   'notification_toggle')]),
-          button([("« Volver al Templo", 'main_menu')])]
+    kb = [button([("« Volver al Templo", 'main_menu')])]
+    if uid > 0:
+        notification_icon = '🔔' if db.notifications(uid) == 1 else '🔕'
+        kb.insert(0,
+                  button([(f"Recibir Ordonnanz: {notification_icon}",
+                           'notification_toggle')]))
     ut.edit(update, "Ordonnanz", InlineKeyboardMarkup(kb))
 
 
