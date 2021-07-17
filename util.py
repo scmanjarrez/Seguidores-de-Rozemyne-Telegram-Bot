@@ -75,8 +75,6 @@ def not_started_gui(update):
 
 
 def new_member(update, context):
-    from pprint import pprint
-    pprint(update.to_dict())
     new = []
     for member in update.message.new_chat_members:  # will I get more than one?
         new.append(url(member['first_name'], f"tg://user?id={member['id']}"))
