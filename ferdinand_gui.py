@@ -43,6 +43,7 @@ def menu(update, context):
 
 def main_menu(update):
     kb = [button([("📚 La Biblioteca 📚", 'library_menu')]),
+          button([("🙏 Altar a Mestionora 🙏", 'shrine_menu')]),
           button([("📆 Libros Semanales 📆", 'weekly_menu')]),
           button([("🕊 Ordonnanz 🕊", 'notifications_menu')])]
     resp = ut.send
@@ -77,6 +78,14 @@ def volume_menu(update, part, volume):
         kb.insert(idx, button_url([(f"{ch_title}", ch_url)]))
     ut.edit(update, f"Parte {part}: Volúmen {volume}",
             InlineKeyboardMarkup(kb))
+
+
+def shrine_menu(update):
+    kb = [button_url([("Biblioteca de Mestionora",
+                       'https://t.me/joinchat/BsOZCHu4xDY1ZmVh')]),
+          button([("« Volver al Templo", 'main_menu')])]
+
+    ut.edit(update, "Altar a Mestionora", InlineKeyboardMarkup(kb))
 
 
 def weekly_menu(update):

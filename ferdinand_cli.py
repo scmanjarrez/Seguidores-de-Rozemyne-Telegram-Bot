@@ -75,20 +75,6 @@ def start(update, context):
     ut.send(update, msg)
 
 
-def weekly(update, context):
-    uid = update.effective_message.chat.id
-    if not db.cached(uid):
-        ut.not_started(update)
-    else:
-        msg = ["Los libros que se imprimirán esta semana son:\n"]
-        chapters = db.new_chapters()
-        for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
-                chapters):
-            msg.append(
-                f"<b>{ch_title}:</b> {_available(ch_available, ch_url)}")
-        ut.send(update, "\n".join(msg))
-
-
 def library(update, context):
     uid = update.effective_message.chat.id
     if not db.cached(uid):
@@ -119,6 +105,31 @@ def bookshelf(update, context):
             else:
                 msg = ["La parte o el volúmen "
                        "no se encuentran en la biblioteca."]
+        ut.send(update, "\n".join(msg))
+
+
+def shrine(update, context):
+    uid = update.effective_message.chat.id
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        url_msg = ut.url('Biblioteca de Mestionora',
+                         'https://t.me/joinchat/BsOZCHu4xDY1ZmVh')
+        msg = f"Puedes rezar a Mestionora en la {url_msg}"
+        ut.send(update, msg)
+
+
+def weekly(update, context):
+    uid = update.effective_message.chat.id
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        msg = ["Los libros que se imprimirán esta semana son:\n"]
+        chapters = db.new_chapters()
+        for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
+                chapters):
+            msg.append(
+                f"<b>{ch_title}:</b> {_available(ch_available, ch_url)}")
         ut.send(update, "\n".join(msg))
 
 
@@ -153,23 +164,31 @@ def stop(update, context):
     ut.send(update, msg)
 
 
+def force_scrape(update, context):
+    uid = update.effective_message.chat.id
+    with open('.adminid', 'r') as f:
+        admin = int(f.read().strip())
+    if uid == admin:
+        ut.scrape_index()
+
+
 def force_check(update, context):
     uid = update.effective_message.chat.id
     with open('.adminid', 'r') as f:
         admin = int(f.read().strip())
     if uid == admin:
-        ut.check_available(context.job_queue)
+        ut.check_availability(context.job_queue)
 
 
 def publish_translation(update, context):
     uid = update.effective_message.chat.id
     with open('.publishid', 'r') as f:
-        admin, group = map(int, f.read().splitlines())
-    if uid == admin:
-        if len(context.args) != 1:
-            msg = "Recuerda enviar la URL del canal como argumento."
-        else:
-            msg = (f"Has recibido la bendición de Mestionora, "
-                   f"ahora puedes leer las historias de "
-                   f"{ut.url('esta semana', context.args[0])}.")
-        ut.send_bot(context.bot, group, msg)
+        publisher = int(f.read().strip())
+    if uid == publisher:
+        args = " ".join(context.args).split('_')
+        channel = ut.url('bendición semanal', args[-1])
+        titles = [f"<b>{tit}</b>\n" for tit in args[:-1]]
+        msg = (f"💫✨ Has recibido la {channel} de Mestionora ✨💫\n\n"
+               f"Ya puedes leer los siguientes libros:\n\n"
+               f"{''.join(titles)}")
+        ut.notify_publication(context.job_queue, msg)

@@ -74,6 +74,21 @@ def not_started_gui(update):
     edit(update, msg, None)
 
 
+def new_member(update, context):
+    from pprint import pprint
+    pprint(update.to_dict())
+    new = []
+    for member in update.message.new_chat_members:  # will I get more than one?
+        new.append(url(member['first_name'], f"tg://user?id={member['id']}"))
+    if len(new) == 1:
+        msg = (f"Bienvenido al templo {', '.join(new)}. "
+               f"Has sido bautizado/a como un noble de Ehrenfest.")
+    else:
+        msg = (f"Bienvenidos al templo {', '.join(new)}. "
+               f"Habéis sido bautizados como nobles de Ehrenfest.")
+    send(update, msg)
+
+
 def _remove_job(queue, name):
     current_jobs = queue.get_jobs_by_name(name)
     if current_jobs:
@@ -88,11 +103,7 @@ def notify_callback(context):
     send_bot(context.bot, uid, msg)
 
 
-def notify_titles(queue, chapters):
-    msg = ["Los libros que se imprimirán esta semana son:\n"]
-    for ch_title in chapters:
-        msg.append(f"<b>{ch_title}</b>")
-
+def notify_publication(queue, msg):
     users = db.all_users_notify()
     cnt = USERS_TO_NOTIFY
     time = 0
@@ -101,7 +112,7 @@ def notify_titles(queue, chapters):
             cnt = USERS_TO_NOTIFY
             time += TIME_BETWEEN_NOTIFY
         queue.run_once(notify_callback, time,
-                       context=(uid, "\n".join(msg)),
+                       context=(uid, msg),
                        name=f"{uid}: {msg[:15]}")
         cnt -= 1
 
@@ -110,37 +121,15 @@ def url(text, url):
     return f"<b><a href='{url}'>{text}</a></b>"
 
 
-def notify_available(queue, chapters):
-    msg = ["Ya se han impreso los siguientes libros:\n"]
-    for ch_title, ch_url in chapters:
-        msg.append(url(ch_title, ch_url))
-
-    users = db.all_users_notify()
-    cnt = USERS_TO_NOTIFY
-    time = 0
-    for uid, in users:
-        if cnt == 0:
-            cnt = USERS_TO_NOTIFY
-            time += TIME_BETWEEN_NOTIFY
-        queue.run_once(notify_callback, time,
-                       context=(uid, "\n".join(msg)),
-                       name=f"{uid}: {msg[:15]}")
-        cnt -= 1
-
-
 def check_available(queue):
     chapters = db.unavailable_chapters()
-    available = []
     for ch_part, ch_volume, ch_title, ch_url in chapters:
         resp = req.get(ch_url)
         soup = bs.BeautifulSoup(resp.text, 'lxml')
         if not soup.find_all("div", {"class": "patreon-campaign-banner"}):
             db.set_available(ch_part, ch_volume, ch_title)
-            available.append((ch_title, ch_url))
-    if available:
-        notify_available(queue, available)
-    if len(chapters) == len(available):
-        _remove_job(queue, 'friday_hourly')
+    if not len(chapters):
+        _remove_job(queue, 'saturday_hourly')
 
 
 def scrape_chapters(part_volume_url):
@@ -204,12 +193,9 @@ def titles_callback(context):
             for cur in current_chap:
                 ch_part, ch_volume, ch_title, _, _ = cur
                 db.unset_new(ch_part, ch_volume, ch_title)
-            new_chap = []
             for ch_title, ch_url in scraped_chap:
                 if not db.chapter_cached(part, volume, ch_title):
                     db.add_chapter(part, volume, ch_title, ch_url)
-                    new_chap.append(ch_title)
-            notify_titles(queue, new_chap)
 
 
 def availability_callback(context):
@@ -223,10 +209,10 @@ def tuesday_callback(context):
                         context=queue, name='tuesday_hourly')
 
 
-def friday_callback(context):
+def saturday_callback(context):
     queue = context.job.context
     queue.run_repeating(availability_callback, 1 * 60 * 60, 1,
-                        context=queue, name='friday_hourly')
+                        context=queue, name='saturday_hourly')
 
 
 def check_weekly(queue):
@@ -234,5 +220,5 @@ def check_weekly(queue):
     queue.run_daily(tuesday_callback, noon, days=(1,),
                     context=queue, name='tuesday_weekly')
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
-    queue.run_daily(friday_callback, midnight, days=(5,),
-                    context=queue, name='sunday_weekly')
+    queue.run_daily(saturday_callback, midnight, days=(5,),
+                    context=queue, name='saturday_weekly')

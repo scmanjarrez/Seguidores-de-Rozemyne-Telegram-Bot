@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from telegram.ext import (CallbackQueryHandler, CommandHandler,
+from telegram.ext import (CallbackQueryHandler, CommandHandler, MessageHandler,
                           Filters, Updater)
 from telegram.error import BadRequest
 import ferdinand_cli as cli
@@ -31,6 +31,8 @@ def button_handler(update, context):
         elif query.data.startswith('volume_'):
             args = query.data.split('_')
             gui.volume_menu(update, args[1], args[2])
+        elif query.data == 'shrine_menu':
+            gui.shrine_menu(update)
         elif query.data == 'weekly_menu':
             gui.weekly_menu(update)
         elif query.data == 'notifications_menu':
@@ -44,6 +46,10 @@ def setup_handlers(dispatch, job_queue):
                                    filters=~Filters.update.edited_message)
     dispatch.add_handler(start_handler)
 
+    new_member_handler = MessageHandler(Filters.status_update.new_chat_members,
+                                        ut.new_member)
+    dispatch.add_handler(new_member_handler)
+
     stop_handler = CommandHandler('parar', cli.stop,
                                   filters=~Filters.update.edited_message)
     dispatch.add_handler(stop_handler)
@@ -56,10 +62,6 @@ def setup_handlers(dispatch, job_queue):
                                   filters=~Filters.update.edited_message)
     dispatch.add_handler(menu_handler)
 
-    weekly_handler = CommandHandler('semanal', cli.weekly,
-                                    filters=~Filters.update.edited_message)
-    dispatch.add_handler(weekly_handler)
-
     library_handler = CommandHandler('biblioteca', cli.library,
                                      filters=~Filters.update.edited_message)
     dispatch.add_handler(library_handler)
@@ -68,9 +70,21 @@ def setup_handlers(dispatch, job_queue):
                                        filters=~Filters.update.edited_message)
     dispatch.add_handler(bookshelf_handler)
 
+    shrine_handler = CommandHandler('altar', cli.shrine,
+                                    filters=~Filters.update.edited_message)
+    dispatch.add_handler(shrine_handler)
+
+    weekly_handler = CommandHandler('semanal', cli.weekly,
+                                    filters=~Filters.update.edited_message)
+    dispatch.add_handler(weekly_handler)
+
     ordonnanz_handler = CommandHandler('ordonnanz', cli.ordonnanz,
                                        filters=~Filters.update.edited_message)
     dispatch.add_handler(ordonnanz_handler)
+
+    scrape_handler = CommandHandler('forcescrape', cli.force_scrape,
+                                    filters=~Filters.update.edited_message)
+    dispatch.add_handler(scrape_handler)
 
     update_handler = CommandHandler('forceupdate', cli.force_check,
                                     filters=~Filters.update.edited_message)
