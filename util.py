@@ -80,10 +80,12 @@ def new_member(update, context):
         new.append(url(member['first_name'], f"tg://user?id={member['id']}"))
     if len(new) == 1:
         msg = (f"Bienvenido al templo {', '.join(new)}. "
-               f"Has sido bautizado/a como un noble de Ehrenfest.")
+               f"A partir de este momento, "
+               f"eres reconocido como un noble de Ehrenfest.")
     else:
         msg = (f"Bienvenidos al templo {', '.join(new)}. "
-               f"Habéis sido bautizados como nobles de Ehrenfest.")
+               f"A partir de este momento, "
+               f"sois reconocidos como nobles de Ehrenfest.")
     send(update, msg)
 
 
@@ -119,7 +121,7 @@ def url(text, url):
     return f"<b><a href='{url}'>{text}</a></b>"
 
 
-def check_available(queue):
+def check_availability(queue):
     chapters = db.unavailable_chapters()
     for ch_part, ch_volume, ch_title, ch_url in chapters:
         resp = req.get(ch_url)
@@ -198,7 +200,7 @@ def titles_callback(context):
 
 def availability_callback(context):
     queue = context.job.context
-    check_available(queue)
+    check_availability(queue)
 
 
 def tuesday_callback(context):
