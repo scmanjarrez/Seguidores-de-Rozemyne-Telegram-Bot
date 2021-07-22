@@ -176,26 +176,29 @@ def scrape_index(empty=False):
                 print(f"No match: {txt}")
 
 
+def check_index(queue):
+    part, volume, _, url = db.unfinished_part()
+    cached_n_chap = db.n_chapters(part, volume)
+    current_chap = db.new_chapters()
+    scraped_chap, ended = scrape_chapters(url)
+    if ended:
+        db.set_finished(part, volume)
+    if cached_n_chap != len(scraped_chap):
+        _remove_job(queue, 'tuesday_hourly')
+        for cur in current_chap:
+            ch_part, ch_volume, ch_title, _, _ = cur
+            db.unset_new(ch_part, ch_volume, ch_title)
+        for ch_title, ch_url in scraped_chap:
+            if not db.chapter_cached(part, volume, ch_title):
+                db.add_chapter(part, volume, ch_title, ch_url)
+
+
 def titles_callback(context):
     queue = context.job.context
-    unfinished = db.unfinished_part()
-    if unfinished is None:
+    if db.unfinished_part() is None:
         scrape_index()
     else:
-        part, volume, _, url = unfinished
-        cached_n_chap = db.n_chapters(part, volume)
-        current_chap = db.new_chapters()
-        scraped_chap, ended = scrape_chapters(url)
-        if ended:
-            db.set_finished(part, volume)
-        if cached_n_chap != len(scraped_chap):
-            _remove_job(queue, 'tuesday_hourly')
-            for cur in current_chap:
-                ch_part, ch_volume, ch_title, _, _ = cur
-                db.unset_new(ch_part, ch_volume, ch_title)
-            for ch_title, ch_url in scraped_chap:
-                if not db.chapter_cached(part, volume, ch_title):
-                    db.add_chapter(part, volume, ch_title, ch_url)
+        check_index(queue)
 
 
 def availability_callback(context):

@@ -172,7 +172,7 @@ def force_scrape(update, context):
     with open('.adminid', 'r') as f:
         admin = int(f.read().strip())
     if uid == admin:
-        ut.scrape_index()
+        ut.check_index(context.job_queue)
 
 
 def force_check(update, context):
