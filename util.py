@@ -177,7 +177,12 @@ def scrape_index(empty=False):
 
 
 def check_index(queue):
-    part, volume, _, url = db.unfinished_part()
+    tmp = db.unfinished_part()
+    if tmp is not None:
+        part, volume, _, url = tmp
+    else:
+        scrape_index()
+        part, volume, _, url = db.unfinished_part()
     cached_n_chap = db.n_chapters(part, volume)
     current_chap = db.new_chapters()
     scraped_chap, ended = scrape_chapters(url)
