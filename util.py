@@ -123,13 +123,18 @@ def url(text, url):
 
 def check_availability(queue):
     chapters = db.unavailable_chapters()
-    for ch_part, ch_volume, ch_title, ch_url in chapters:
-        resp = req.get(ch_url)
-        soup = bs.BeautifulSoup(resp.text, 'lxml')
-        if not soup.find_all("div", {"class": "patreon-campaign-banner"}):
-            db.set_available(ch_part, ch_volume, ch_title)
     if not len(chapters):
         _remove_job(queue, 'saturday_hourly')
+        # debugging an error
+        print("Available check ended: ",
+              datetime.datetime.now(
+                  pytz.timezone('Europe/Madrid')).strftime("%A %d/%m/%y %H:%M:%S"))
+    else:
+        for ch_part, ch_volume, ch_title, ch_url in chapters:
+            resp = req.get(ch_url)
+            soup = bs.BeautifulSoup(resp.text, 'lxml')
+            if not soup.find_all("div", {"class": "patreon-campaign-banner"}):
+                db.set_available(ch_part, ch_volume, ch_title)
 
 
 def scrape_chapters(part_volume_url):
@@ -190,6 +195,10 @@ def check_index(queue):
         db.set_finished(part, volume)
     if cached_n_chap != len(scraped_chap):
         _remove_job(queue, 'tuesday_hourly')
+        print("Title check ended: ",
+              datetime.datetime.now(
+                  pytz.timezone('Europe/Madrid')).strftime("%A %d/%m/%y %H:%M:%S"))
+        print(cached_n_chap, scraped_chap)
         for cur in current_chap:
             ch_part, ch_volume, ch_title, _, _ = cur
             db.unset_new(ch_part, ch_volume, ch_title)
@@ -224,9 +233,8 @@ def saturday_callback(context):
 
 
 def check_weekly(queue):
-    noon = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
+    noon = datetime.time(hour=12, tzinfo=pytz.timezone('Europe/Madrid'))
     queue.run_daily(tuesday_callback, noon, days=(1,),
                     context=queue, name='tuesday_weekly')
-    midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
-    queue.run_daily(saturday_callback, midnight, days=(5,),
+    queue.run_daily(saturday_callback, noon, days=(5,),
                     context=queue, name='saturday_weekly')
