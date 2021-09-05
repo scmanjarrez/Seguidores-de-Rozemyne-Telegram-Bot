@@ -189,7 +189,6 @@ def publish_translation(update, context):
         publisher = int(f.read().strip())
     if uid == publisher:
         args = [line.strip() for line in " ".join(context.args).split('_')]
-        print(args)
         channel = ut.url('bendición semanal', args[-1])
         titles = [f"<b>{tit}</b>\n" for tit in args[:-1]]
         msg = (f"💫✨ Has recibido la {channel} de Mestionora ✨💫\n\n"

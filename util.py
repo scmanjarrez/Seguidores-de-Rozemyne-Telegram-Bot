@@ -124,11 +124,7 @@ def url(text, url):
 def check_availability(queue):
     chapters = db.unavailable_chapters()
     if not len(chapters):
-        _remove_job(queue, 'saturday_hourly')
-        # debugging an error
-        print("Available check ended: ",
-              datetime.datetime.now(
-                  pytz.timezone('Europe/Madrid')).strftime("%A %d/%m/%y %H:%M:%S"))
+        _remove_job(queue, 'sunday_hourly')
     else:
         for ch_part, ch_volume, ch_title, ch_url in chapters:
             resp = req.get(ch_url)
@@ -195,10 +191,6 @@ def check_index(queue):
         db.set_finished(part, volume)
     if cached_n_chap != len(scraped_chap):
         _remove_job(queue, 'tuesday_hourly')
-        print("Title check ended: ",
-              datetime.datetime.now(
-                  pytz.timezone('Europe/Madrid')).strftime("%A %d/%m/%y %H:%M:%S"))
-        print(cached_n_chap, scraped_chap)
         for cur in current_chap:
             ch_part, ch_volume, ch_title, _, _ = cur
             db.unset_new(ch_part, ch_volume, ch_title)
@@ -226,15 +218,15 @@ def tuesday_callback(context):
                         context=queue, name='tuesday_hourly')
 
 
-def saturday_callback(context):
+def sunday_callback(context):
     queue = context.job.context
     queue.run_repeating(availability_callback, 1 * 60 * 60, 1,
-                        context=queue, name='saturday_hourly')
+                        context=queue, name='sunday_hourly')
 
 
 def check_weekly(queue):
-    noon = datetime.time(hour=12, tzinfo=pytz.timezone('Europe/Madrid'))
-    queue.run_daily(tuesday_callback, noon, days=(1,),
+    midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
+    queue.run_daily(tuesday_callback, midnight, days=(1,),
                     context=queue, name='tuesday_weekly')
-    queue.run_daily(saturday_callback, noon, days=(5,),
-                    context=queue, name='saturday_weekly')
+    queue.run_daily(sunday_callback, midnight, days=(6,),
+                    context=queue, name='sunday_weekly')
