@@ -1,5 +1,6 @@
 import database as db
 import util as ut
+import ferdinand
 
 
 HELP = (
@@ -169,24 +170,21 @@ def stop(update, context):
 
 def force_scrape(update, context):
     uid = update.effective_message.chat.id
-    with open('.adminid', 'r') as f:
-        admin = int(f.read().strip())
+    admin = int(ferdinand.load_config()['admin'])
     if uid == admin:
         ut.check_index(context.job_queue)
 
 
 def force_check(update, context):
     uid = update.effective_message.chat.id
-    with open('.adminid', 'r') as f:
-        admin = int(f.read().strip())
+    admin = int(ferdinand.load_config()['admin'])
     if uid == admin:
         ut.check_availability(context.job_queue)
 
 
 def publish_translation(update, context):
     uid = update.effective_message.chat.id
-    with open('.publishid', 'r') as f:
-        publisher = int(f.read().strip())
+    publisher = int(ferdinand.load_config()['publisher'])
     if uid == publisher:
         args = [line.strip() for line in " ".join(context.args).split('_')]
         channel = ut.url('bendición semanal', args[-1])

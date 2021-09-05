@@ -3,10 +3,7 @@
 server/
 diptico.db
 diptico.sql
-.apikey
-.adminid
-.publishid
-.trackings
+.config
 pyschtappe/
 
 # Byte-compiled / optimized / DLL files

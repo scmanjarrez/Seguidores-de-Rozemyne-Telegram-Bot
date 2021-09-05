@@ -97,23 +97,39 @@ def setup_handlers(dispatch, job_queue):
     dispatch.add_handler(CallbackQueryHandler(button_handler))
 
 
+def load_config():
+    with open(".config", 'r') as f:
+        config = {k: v for k, v in
+                  [line.split('=') for line in f.read().splitlines()]}
+    return config
+
+
 if __name__ == '__main__':
     log.basicConfig(format=('%(asctime)s - %(name)s - '
                             '%(levelname)s - %(message)s'),
                     level=log.INFO)
+    if os.path.isfile('.config'):
+        config = load_config()
 
-    with open(".apikey", 'r') as f:
-        API_KEY = f.read().strip()
+        db.setup_db()
+        if not len(db.parts()):
+            ut.scrape_index(empty=True)
 
-    db.setup_db()
-    if not os.path.exists(db.DB):
-        ut.scrape_index(empty=True)
+        updater = Updater(token=config['apikey'], use_context=True)
+        dispatcher = updater.dispatcher
 
-    updater = Updater(token=API_KEY, use_context=True)
-    dispatcher = updater.dispatcher
+        ut.check_weekly(updater.job_queue)
+        setup_handlers(dispatcher, updater.job_queue)
 
-    ut.check_weekly(updater.job_queue)
-    setup_handlers(dispatcher, updater.job_queue)
-
-    updater.start_polling()
-    updater.idle()
+        updater.start_webhook(listen=config['listen'],
+                              port=config['port'],
+                              url_path=config['apikey'],
+                              key=config['key'],
+                              cert=config['cert'],
+                              webhook_url=(f"https://"
+                                           f"{config['ip']}:"
+                                           f"{config['port']}/"
+                                           f"{config['apikey']}"))
+        updater.idle()
+    else:
+        print("File .config not found.")
