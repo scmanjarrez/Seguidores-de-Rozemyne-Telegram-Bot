@@ -1,6 +1,6 @@
+import ferdinand_gui as gui
 import database as db
 import util as ut
-import ferdinand
 
 
 HELP = (
@@ -10,149 +10,188 @@ HELP = (
     "❔ /menu - Interactúa con el bot mediante botones. <b>[beta]</b>"
     "\n\n"
 
-    "❔ /semanal - Libros que se imprimen cada semana "
-    "(se actualiza cada martes)."
+    "❔ /semanal - Libros que se imprimen cada semana."
     "\n"
     "❔ /biblioteca - Lista de libros en la biblioteca."
     "\n"
-    "❔ /estanteria <code>parte volúmen</code> - "
+    "❔ /estanteria <code>&lt;parte&gt; &lt;volúmen&gt;</code> - "
     "Lista de libros en la estantería."
     "\n"
-    "❔ /ordonnanz - Permite/prohíbe el uso de ordonnanz."
+    "❔ /altares - Lista de altares a los dioses."
+    "\n"
+    "❔ /ordonnanz - Permite/prohíbe el envío de ordonnanz."
     "\n\n"
 
-    "❔ /ayuda - Pide ayuda a Ferdinand."
+    "❔ /ayuda - Pide consejos a Ferdinand."
     "\n"
-    "❔ /parar - Renuncia a tu ciudadanía de Ehrenfest."
+    "❔ /parar - Renuncia a la ciudadanía de Ehrenfest."
     "\n\n"
 )
 
-
-def _available(state, url):
-    if state == 1:
-        return f"<a href='{url}'>liberado</a>"
-    else:
-        return "<code>no liberado</code>"
+GROUP = ("Es posible que hayan espías de Ahrensbach leyendo, usemos "
+         "un método seguro.")
 
 
-def _to_volume(volume):
-    if volume == '1':
-        return 'I'
-    if volume == '2':
-        return 'II'
-    if volume == '3':
-        return 'III'
-    if volume == '4':
-        return 'IV'
-    if volume == '5':
-        return 'V'
-    if volume == '6':
-        return 'VI'
-    if volume == '7':
-        return 'VII'
-    if volume == '8':
-        return 'VIII'
-    if volume == '9':
-        return 'IX'
+VOLUME = {
+    '1': 'I',
+    '2': 'II',
+    '3': 'III',
+    '4': 'IV',
+    '5': 'V',
+    '6': 'VI',
+    '7': 'VII',
+    '8': 'VIII',
+    '9': 'IX'
+}
+
+
+def _redirect(bot, cid, command):
+    ut.send_bot(bot, cid, GROUP,
+                reply_markup=gui.button_redirect(bot, command))
 
 
 def start(update, context):
-    uid = update.effective_message.chat.id
-    if uid < 0:  # group
-        fname = update.effective_message.chat.title
-        msg = "Esta provincia ya pertenece a Ehrenfest."
-    else:
-        fname = update.effective_message.chat.first_name
-        msg = f"<b>{fname}</b>, ya eres un noble de Ehrenfest."
-
-    if not db.cached(uid):
-        db.add_user(uid)
-        if uid < 0:
-            msg = (f"La provincia <b><i>{fname}</i></b> "
-                   f"acaba de añadirse a Ehrenfest.\n\n{HELP}")
+    uid = ut.uid(update)
+    if not context.args:
+        if not ut.is_group(uid):
+            fname = update.effective_message.chat.first_name
+            msg = f"<b>{fname}</b>, ya eres un noble de Ehrenfest."
+        elif ut.is_group(uid) and ut.is_admin(update, context):
+            msg = "Esta provincia ya pertenece a Ehrenfest."
         else:
+            msg = "Sólo la facción del Aub puede controlar las fronteras."
+
+        if not db.cached(uid) and not ut.is_group(uid):
+            db.add_user(uid)
             msg = (f"<b>{fname}</b>, acabas de ser bautizado "
                    f"como un noble de Ehrenfest.\n\n{HELP}")
-    ut.send(update, msg)
-
-
-def library(update, context):
-    uid = update.effective_message.chat.id
-    if not db.cached(uid):
-        ut.not_started(update)
-    else:
-        msg = ["Las estanterías que hay en la biblioteca son:\n"]
-        parts = db.parts()
-        for part, volume, title, url in parts:
-            msg.append(ut.url(f"Parte {part}: {title} {volume}", url))
-        ut.send(update, "\n".join(msg))
-
-
-def bookshelf(update, context):
-    uid = update.effective_message.chat.id
-    if not db.cached(uid):
-        ut.not_started(update)
-    else:
-        msg = ["Es necesario que me digas "
-               "la parte y el volúmen que quieras revisar."]
-        if len(context.args) == 2:
-            part, volume = context.args
-            if (int(part) in range(1, db.n_parts() + 1) and
-                int(volume) in range(1, db.n_volumes(part) + 1)):  # noqa
-                msg = ["Estos son los libros que me has pedido:\n"]
-                chapters = db.chapters(part, _to_volume(volume))
-                for ch_title, ch_url in chapters:
-                    msg.append(ut.url(ch_title, ch_url))
-            else:
-                msg = ["La parte o el volúmen "
-                       "no se encuentran en la biblioteca."]
-        ut.send(update, "\n".join(msg))
-
-
-def shrine(update, context):
-    uid = update.effective_message.chat.id
-    if not db.cached(uid):
-        ut.not_started(update)
-    else:
-        url_msg = ut.url('Biblioteca de Mestionora',
-                         'https://t.me/joinchat/BsOZCHu4xDY1ZmVh')
-        msg = f"Puedes rezar a Mestionora en la {url_msg}"
+        elif (not db.cached(uid) and ut.is_group(uid)
+              and ut.is_admin(update, context)):
+            db.add_user(uid)
+            fname = update.effective_message.chat.title
+            msg = (f"La provincia <b><i>{fname}</i></b> "
+                   f"se ha incorporado a Ehrenfest.\n\n{HELP}")
         ut.send(update, msg)
+    else:
+        if not db.cached(uid):
+            db.add_user(uid)
+        if context.args[0] == 'deep_week':
+            weekly(update, context)
+        elif context.args[0] == 'deep_lib':
+            library(update, context)
+        elif context.args[0].startswith('deep_book'):
+            context.args = context.args[0].split('-')[1:]
+            bookshelf(update, context)
+        elif context.args[0] == 'deep_sh':
+            shrines(update, context)
 
 
 def weekly(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        msg = ["Los libros que se imprimirán esta semana son:\n"]
-        chapters = db.new_chapters()
-        for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
-                chapters):
-            msg.append(
-                f"<b>{ch_title}:</b> {_available(ch_available, ch_url)}")
-        ut.send(update, "\n".join(msg))
+        if ut.is_group(uid):
+            _redirect(context.bot, uid, "deep_week")
+        else:
+            msg = ["Los libros que se imprimirán esta semana son:\n\n"]
+            chapters = db.mestionora_chapters()
+            for ch_title in chapters:
+                msg.append(f"<b>{ch_title}\n</b>")
+            url_msg = ut.url('Biblioteca de Mestionora',
+                             ut.load_config()['channel'])
+            msg.append(f"\nPuedes leerlos en la {url_msg}")
+            ut.send(update, "".join(msg))
+
+
+def library(update, context):
+    uid = ut.uid(update)
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        if ut.is_group(uid):
+            _redirect(context.bot, uid, "deep_lib")
+        else:
+            msg = ["Las estanterías que hay en la biblioteca son:\n"]
+            parts = db.parts()
+            for part, volume, title, url in parts:
+                msg.append(ut.url(f"Parte {part}: {title} {volume}", url))
+            ut.send(update, "\n".join(msg))
+
+
+def bookshelf(update, context):
+    uid = ut.uid(update)
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        if ut.is_group(uid):
+            _redirect(context.bot, uid, f"deep_book-{'-'.join(context.args)}")
+        else:
+            msg = ["Es necesario que me digas "
+                   "la parte y el volúmen que quieras revisar. "
+                   "Ej: /estanteria 4 1"]
+            if len(context.args) == 2:
+                part, volume = context.args
+                if (int(part) in range(1, db.n_parts() + 1) and
+                    int(volume) in range(1, db.n_volumes(part) + 1)):  # noqa
+                    msg = ["Estos son los libros que me has pedido:\n"]
+                    chapters = db.chapters(part, VOLUME[volume])
+                    for ch_title, ch_url in chapters:
+                        msg.append(ut.url(ch_title, ch_url))
+                else:
+                    msg = ["Esa parte y/o volúmen "
+                           "no se encuentran en la biblioteca."]
+            ut.send(update, "\n".join(msg))
+
+
+def shrines(update, context):
+    uid = ut.uid(update)
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        if ut.is_group(uid):
+            _redirect(context.bot, uid, "deep_sh")
+        else:
+            msg = ["Puedes rezar a los dioses en los siguientes altares:\n\n",
+                   ut.url("- Seguidores de Rozemyne [grupo]\n",
+                          ut.load_config()['group']),
+                   ut.url("- Seguidores de Rozemyne (Spoilers) [grupo]\n",
+                          ut.load_config()['spoilers']),
+                   ut.url("- Biblioteca de Mestionora [canal]\n",
+                          ut.load_config()['channel']),
+                   ut.url("- Los Gutenbergs [youtube]\n",
+                          ut.load_config()['youtube']),
+                   ut.url("- Fans de Ascendance of a Bookworm [discord]\n",
+                          ut.load_config()['discord']),
+                   ut.url("- Honzuki no Gekokujou (Myne y sus Bookworms) "
+                          "LatinoFans Y más! [facebook]\n",
+                          ut.load_config()['facebook'])
+                   ]
+            ut.send(update, "".join(msg))
 
 
 def ordonnanz(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        if uid < 0:
-            msg = ("No es posible renunciar a las Ordonnanz del Aub.")
+        if ut.is_group(uid) and not ut.is_admin(update, context):
+            msg = ("Sólo la facción del Aub puede controlar la Ordonnanz.")
         else:
             db.toggle_notifications(uid)
             if db.notifications(uid) == 1:
-                msg = ("Se te enviará una Ordonnanz cada vez "
-                       "que se imprima un nuevo libro.")
+                msg = (f"Se {'' if ut.is_group(uid) else 'te '}"
+                       f"enviará una Ordonnanz cada vez "
+                       f"que se imprima un nuevo libro.")
+
             else:
-                msg = "Ya no se te enviarán más Ordonnanz."
+                msg = (f"Ya no se {'' if ut.is_group(uid) else 'te '}"
+                       f"enviarán más Ordonnanz.")
         ut.send(update, msg)
 
 
 def bot_help(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     if not db.cached(uid):
         ut.not_started(update)
     else:
@@ -160,36 +199,39 @@ def bot_help(update, context):
 
 
 def stop(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     msg = "No eres un noble de Ehrenfest."
+    if ut.is_group(uid):
+        msg = "Esta provincia no pertenece a Ehrenfest."
     if db.cached(uid):
-        ut.blocked(uid)
-        msg = "Se te ha eliminado la ciudadanía de Ehrenfest."
+        if ut.is_group(uid) and not ut.is_admin(update, context):
+            msg = "Sólo la facción del Aub puede controlar las fronteras."
+        else:
+            ut.blocked(uid)
+            msg = "Ya no eres un noble de Ehrenfest."
+            if ut.is_group(uid):
+                msg = "Esta provincia ha dejado de pertenecer a Ehrenfest."
     ut.send(update, msg)
 
 
-def force_scrape(update, context):
-    uid = update.effective_message.chat.id
-    admin = int(ferdinand.load_config()['admin'])
+def update_db(update, context):
+    uid = ut.uid(update)
+    admin = int(ut.load_config()['admin'])
     if uid == admin:
         ut.check_index(context.job_queue)
 
 
-def force_check(update, context):
-    uid = update.effective_message.chat.id
-    admin = int(ferdinand.load_config()['admin'])
-    if uid == admin:
-        ut.check_availability(context.job_queue)
-
-
 def publish_translation(update, context):
-    uid = update.effective_message.chat.id
-    publisher = int(ferdinand.load_config()['publisher'])
+    uid = ut.uid(update)
+    publisher = int(ut.load_config()['publisher'])
     if uid == publisher:
-        args = [line.strip() for line in " ".join(context.args).split('_')]
-        channel = ut.url('bendición semanal', args[-1])
-        titles = [f"<b>{tit}</b>\n" for tit in args[:-1]]
-        msg = (f"💫✨ Has recibido la {channel} de Mestionora ✨💫\n\n"
-               f"Ya puedes leer los siguientes libros:\n\n"
-               f"{''.join(titles)}")
+        titles = [line.strip() for line in " ".join(context.args).split('_')]
+        channel = ut.url('Biblioteca de Mestionora',
+                         ut.load_config()['channel'])
+        db.add_mestionora(titles)
+        b_titles = [f"<b>- {tit}\n</b>" for tit in titles]
+        msg = (f"✨ Has recibido la bendición semanal de Mestionora ✨\n\n"
+               f"Los libros que se imprimirán esta semana son:\n\n"
+               f"{''.join(b_titles)}\n"
+               f"Puedes leerlos en la {channel}")
         ut.notify_publication(context.job_queue, msg)

@@ -29,8 +29,12 @@ def setup_db():
                     PRIMARY KEY (part, volume, title)
                 );
 
+                CREATE TABLE IF NOT EXISTS mestionora (
+                    title TEXT PRIMARY KEY
+                );
+
                 CREATE TABLE IF NOT EXISTS users (
-                    uid INTEGER,
+                    uid INTEGER PRIMARY KEY,
                     notifications INTEGER DEFAULT 1
                 );
                 """
@@ -206,6 +210,23 @@ def unset_new(part, volume, title):
                         'AND title = ?',
                         [part, volume, title])
             db.commit()
+
+
+def add_mestionora(titles):
+    with closing(sql.connect(DB)) as db:
+        with closing(db.cursor()) as cur:
+            cur.execute('DELETE FROM mestionora')
+            cur.executemany('INSERT INTO mestionora '
+                            'VALUES (?)',
+                            [(tit,) for tit in titles])
+            db.commit()
+
+
+def mestionora_chapters():
+    with closing(sql.connect(DB)) as db:
+        with closing(db.cursor()) as cur:
+            cur.execute('SELECT * FROM mestionora')
+            return [ch[0] for ch in cur.fetchall()]
 
 
 def users():

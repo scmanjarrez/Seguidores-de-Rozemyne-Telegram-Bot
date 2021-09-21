@@ -1,4 +1,5 @@
 from telegram.error import Unauthorized, BadRequest
+from telegram.utils import helpers
 from telegram import ParseMode
 import requests as req
 import database as db
@@ -21,8 +22,40 @@ USERS_TO_NOTIFY = 20
 TIME_BETWEEN_NOTIFY = 2
 
 
+CONFIG_FILE = '.config'
+CONFIG = None
+
+
+def load_config():
+    global CONFIG
+    if CONFIG is None:
+        with open(CONFIG_FILE, 'r') as f:
+            CONFIG = {k: v for k, v in
+                      [line.split('=') for line in f.read().splitlines()]}
+    return CONFIG
+
+
 def blocked(uid):
     db.del_user(uid)
+
+
+def uid(update):
+    return update.effective_message.chat.id
+
+
+def is_group(uid):
+    return uid < 0
+
+
+def is_admin(update, context, callback=False):
+    if not callback:
+        gid = update.effective_message.chat.id
+        uid = update.effective_message.from_user.id
+    else:
+        gid = update.effective_message.chat.id
+        uid = update.callback_query.from_user.id
+    info = context.bot.get_chat_member(gid, uid)
+    return info.status != 'member'
 
 
 def send(update, msg, quote=True, reply_markup=None, disable_preview=True):
@@ -121,16 +154,8 @@ def url(text, url):
     return f"<b><a href='{url}'>{text}</a></b>"
 
 
-def check_availability(queue):
-    chapters = db.unavailable_chapters()
-    if not len(chapters):
-        _remove_job(queue, 'sunday_hourly')
-    else:
-        for ch_part, ch_volume, ch_title, ch_url in chapters:
-            resp = req.get(ch_url)
-            soup = bs.BeautifulSoup(resp.text, 'lxml')
-            if not soup.find_all("div", {"class": "patreon-campaign-banner"}):
-                db.set_available(ch_part, ch_volume, ch_title)
+def deeplink(bot, command):
+    return helpers.create_deep_linked_url(bot.username, command)
 
 
 def scrape_chapters(part_volume_url):
@@ -207,26 +232,13 @@ def titles_callback(context):
         check_index(queue)
 
 
-def availability_callback(context):
-    queue = context.job.context
-    check_availability(queue)
-
-
 def tuesday_callback(context):
     queue = context.job.context
     queue.run_repeating(titles_callback, 1 * 60 * 60, 1,
                         context=queue, name='tuesday_hourly')
 
 
-def sunday_callback(context):
-    queue = context.job.context
-    queue.run_repeating(availability_callback, 1 * 60 * 60, 1,
-                        context=queue, name='sunday_hourly')
-
-
 def check_weekly(queue):
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
     queue.run_daily(tuesday_callback, midnight, days=(1,),
                     context=queue, name='tuesday_weekly')
-    queue.run_daily(sunday_callback, midnight, days=(6,),
-                    context=queue, name='sunday_weekly')

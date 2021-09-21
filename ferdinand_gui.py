@@ -18,19 +18,18 @@ def _floor_name(part):
     return name
 
 
-def _available(status):
-    if status == 1:
-        return '🟢'
-    else:
-        return '🔴'
-
-
 def button(buttons):
     return [InlineKeyboardButton(bt[0], callback_data=bt[1]) for bt in buttons]
 
 
 def button_url(buttons):
     return [InlineKeyboardButton(bt[0], bt[1]) for bt in buttons]
+
+
+def button_redirect(bot, command):
+    return InlineKeyboardMarkup(
+        [button_url([("Usar herramienta inhibidora de sonido",
+                      ut.deeplink(bot, command))])])
 
 
 def menu(update, context):
@@ -42,14 +41,14 @@ def menu(update, context):
 
 
 def main_menu(update):
-    kb = [button([("📚 La Biblioteca 📚", 'library_menu')]),
-          button([("🙏 Altar a Mestionora 🙏", 'shrine_menu')]),
+    kb = [button([("📚 Biblioteca 📚", 'library_menu')]),
+          button([("🙏 Altares a los Dioses 🙏", 'shrines_menu')]),
           button([("📆 Libros Semanales 📆", 'weekly_menu')]),
           button([("🕊 Ordonnanz 🕊", 'notifications_menu')])]
     resp = ut.send
     if update.callback_query is not None:
         resp = ut.edit
-    resp(update, "El Templo", reply_markup=InlineKeyboardMarkup(kb))
+    resp(update, "Templo", reply_markup=InlineKeyboardMarkup(kb))
 
 
 def library_menu(update):
@@ -57,11 +56,11 @@ def library_menu(update):
     parts = db.total_parts()
     for idx, (part, title) in enumerate(parts):
         kb.insert(idx, button([(f"Parte {part}: {title}", f'part_{part}')]))
-    ut.edit(update, "La Biblioteca", InlineKeyboardMarkup(kb))
+    ut.edit(update, "Biblioteca", InlineKeyboardMarkup(kb))
 
 
 def part_menu(update, part):
-    kb = [button([("« Volver a La Biblioteca", 'library_menu'),
+    kb = [button([("« Volver a la Biblioteca", 'library_menu'),
                   ("« Volver al Templo", 'main_menu')])]
     volumes = db.total_volumes(part)
     for idx, (volume,) in enumerate(volumes):
@@ -80,34 +79,48 @@ def volume_menu(update, part, volume):
             InlineKeyboardMarkup(kb))
 
 
-def shrine_menu(update):
-    kb = [button_url([("Biblioteca de Mestionora",
-                       'https://t.me/joinchat/BsOZCHu4xDY1ZmVh')]),
+def shrines_menu(update):
+    kb = [button_url([("👥 Seguidores de Rozemyne 👥",
+                       ut.load_config()['group'])]),
+          button_url([("👥 Seguidores de Rozemyne (Spoilers) 👥",
+                       ut.load_config()['spoilers'])]),
+          button_url([("📢 Biblioteca de Mestionora 📢",
+                       ut.load_config()['channel'])]),
+          button_url([("🎧 Los Gutenbergs 🎧",
+                       ut.load_config()['youtube'])]),
+          button_url([("🗣 Fans de Ascendance of a Bookworm 🗣",
+                       ut.load_config()['discord'])]),
+          button_url([("👥 Honzuki no Gekokujou (Myne y sus Bookworms) "
+                       "LatinoFans Y más! 👥",
+                       ut.load_config()['facebook'])]),
           button([("« Volver al Templo", 'main_menu')])]
 
-    ut.edit(update, "Altar a Mestionora", InlineKeyboardMarkup(kb))
+    ut.edit(update, "Altares de los Dioses", InlineKeyboardMarkup(kb))
 
 
 def weekly_menu(update):
     kb = [button([("« Volver al Templo", 'main_menu')])]
-    chapters = db.new_chapters()
-    for idx, (part, volume, ch_title, ch_url, ch_available) in enumerate(
-            chapters):
+    chapters = db.mestionora_chapters()
+    for idx, ch_title in enumerate(chapters):
         kb.insert(idx,
-                  button_url([(f"{ch_title}: {_available(ch_available)}",
-                               ch_url)]))
+                  button_url([(f"{ch_title}: 🟢",
+                               ut.load_config()['channel'])]))
     ut.edit(update, "Libros Semanales", InlineKeyboardMarkup(kb))
 
 
-def notifications_menu(update):
+def notifications_menu(update, context):
     uid = update.effective_message.chat.id
     kb = [button([("« Volver al Templo", 'main_menu')])]
-    if uid > 0:
+    tit = "Ordonnanz"
+    if not ut.is_group(uid) or (ut.is_group(uid) and
+                                ut.is_admin(update, context, callback=True)):
         notification_icon = '🔔' if db.notifications(uid) == 1 else '🔕'
         kb.insert(0,
                   button([(f"Recibir Ordonnanz: {notification_icon}",
                            'notification_toggle')]))
-    ut.edit(update, "Ordonnanz", InlineKeyboardMarkup(kb))
+    else:
+        tit = "Sólo disponible para la facción del Aub."
+    ut.edit(update, tit, InlineKeyboardMarkup(kb))
 
 
 def notification_toggle(update):
