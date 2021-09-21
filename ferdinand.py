@@ -124,4 +124,4 @@ if __name__ == '__main__':
                                            f"{config['apikey']}"))
         updater.idle()
     else:
-        print("File .config not found.")
+        print(f"File {ut.CONFIG_FILE} not found.")
