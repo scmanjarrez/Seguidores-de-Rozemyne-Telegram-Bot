@@ -24,7 +24,6 @@ def setup_db():
                     title TEXT,
                     url TEXT,
                     new INTEGER DEFAULT 1,
-                    available INTEGER DEFAULT 0,
                     FOREIGN KEY (part, volume) REFERENCES parts(part, volume),
                     PRIMARY KEY (part, volume, title)
                 );
@@ -151,19 +150,10 @@ def n_chapters(part, volume):
             return cur.fetchall()
 
 
-def unavailable_chapters():
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute('SELECT part, volume, title, url '
-                        'FROM chapters '
-                        'WHERE available = 0')
-            return cur.fetchall()
-
-
 def new_chapters():
     with closing(sql.connect(DB)) as db:
         with closing(db.cursor()) as cur:
-            cur.execute('SELECT part, volume, title, url, available '
+            cur.execute('SELECT part, volume, title '
                         'FROM chapters '
                         'WHERE new = 1')
             return cur.fetchall()
@@ -188,17 +178,6 @@ def chapter_cached(part, volume, title):
                 'WHERE part = ? AND volume = ? AND title = ?)',
                 [part, volume, title])
             return cur.fetchone()[0]
-
-
-def set_available(part, volume, title):
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute('UPDATE chapters '
-                        'SET available = 1 '
-                        'WHERE part = ? AND volume = ? '
-                        'AND title = ?',
-                        [part, volume, title])
-            db.commit()
 
 
 def unset_new(part, volume, title):

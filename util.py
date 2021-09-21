@@ -217,7 +217,7 @@ def check_index(queue):
     if cached_n_chap != len(scraped_chap):
         _remove_job(queue, 'tuesday_hourly')
         for cur in current_chap:
-            ch_part, ch_volume, ch_title, _, _ = cur
+            ch_part, ch_volume, ch_title = cur
             db.unset_new(ch_part, ch_volume, ch_title)
         for ch_title, ch_url in scraped_chap:
             if not db.chapter_cached(part, volume, ch_title):
