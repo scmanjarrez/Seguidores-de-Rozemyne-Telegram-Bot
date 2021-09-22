@@ -28,7 +28,7 @@ HELP = (
     "\n\n"
 )
 
-GROUP = ("Es posible que hayan espías de Ahrensbach leyendo, usemos "
+GROUP = ("Es posible que hayan espías de Ahrensbach escuchando, usemos "
          "un método seguro.")
 
 
