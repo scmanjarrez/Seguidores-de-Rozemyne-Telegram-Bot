@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: MIT
+
+# Copyright (c) 2021 scmanjarrez. All rights reserved.
+# This work is licensed under the terms of the MIT license.
+
 import ferdinand_gui as gui
 import database as db
 import util as ut

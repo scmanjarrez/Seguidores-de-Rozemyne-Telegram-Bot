@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: MIT
+
+# Copyright (c) 2021 scmanjarrez. All rights reserved.
+# This work is licensed under the terms of the MIT license.
+
 from telegram.error import Unauthorized, BadRequest
 from telegram.utils import helpers
 from telegram import ParseMode

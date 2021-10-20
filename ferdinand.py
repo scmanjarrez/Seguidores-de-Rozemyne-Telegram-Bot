@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+
+# Copyright (c) 2021 scmanjarrez. All rights reserved.
+# This work is licensed under the terms of the MIT license.
+
 from telegram.ext import (CallbackQueryHandler, CommandHandler, MessageHandler,
                           Filters, Updater)
 from telegram.error import BadRequest
