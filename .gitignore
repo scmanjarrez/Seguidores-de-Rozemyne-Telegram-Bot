@@ -1,10 +1,10 @@
-# custom
-.idea
+# Custom
+pyschtappe/
 server/
+.idea
+.config
 diptico.db
 diptico.sql
-.config
-pyschtappe/
 *.key
 *.pem
 
