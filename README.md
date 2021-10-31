@@ -1,6 +1,6 @@
 # Descripción
-Código fuente del bot usado en [Seguidores de Rozemyne](https://t.me/SeguidoresDeRozemyne)
-accesible desde @ordonnanz\_bot.
+Código fuente del bot usado en el grupo [Seguidores de Rozemyne](https://t.me/SeguidoresDeRozemyne)
+accesible desde [@ordonnanz\_bot](https://t.me/ordonnanz_bot).
 
 # Requisitos
 - python
