@@ -1,5 +1,6 @@
 # Descripción
-Código fuente del bot de telegram @ehe_te_nandayo_bot
+Código fuente del bot usado en [Seguidores de Rozemyne](https://t.me/SeguidoresDeRozemyne)
+accesible desde @ordonnanz\_bot.
 
 # Requisitos
 - python
