@@ -1,12 +1,8 @@
 # Custom
-pyschtappe/
 server/
-.idea
 .config
 diptico.db
 diptico.sql
-*.key
-*.pem
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

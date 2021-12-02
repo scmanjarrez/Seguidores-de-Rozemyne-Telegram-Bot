@@ -8,15 +8,13 @@
 from telegram.ext import (CallbackQueryHandler, CommandHandler, MessageHandler,
                           Filters, Updater)
 from telegram.error import BadRequest
+
 import ferdinand_cli as cli
 import ferdinand_gui as gui
 import database as db
 import logging as log
 import util as ut
 import os
-
-
-CONFIG = None
 
 
 def button_handler(update, context):
@@ -106,28 +104,24 @@ if __name__ == '__main__':
     log.basicConfig(format=('%(asctime)s - %(name)s - '
                             '%(levelname)s - %(message)s'),
                     level=log.INFO)
-    if os.path.isfile(ut.CONFIG_FILE):
-        config = ut.load_config()
-
+    if os.path.isfile(ut.CONF_FILE):
         db.setup_db()
         if not len(db.parts()):
             ut.scrape_index(empty=True)
 
-        updater = Updater(token=config['apikey'], use_context=True)
+        updater = Updater(token=ut.config('bot'), use_context=True)
         dispatcher = updater.dispatcher
 
         ut.check_weekly(updater.job_queue)
         setup_handlers(dispatcher, updater.job_queue)
 
-        updater.start_webhook(listen=config['listen'],
-                              port=config['port'],
-                              url_path=config['apikey'],
-                              key=config['key'],
-                              cert=config['cert'],
+        updater.start_webhook(listen=ut.config('listen'),
+                              port=ut.config('port'),
+                              url_path=ut.config('bot'),
+                              cert=ut.config('cert'),
                               webhook_url=(f"https://"
-                                           f"{config['ip']}:"
-                                           f"{config['port']}/"
-                                           f"{config['apikey']}"))
+                                           f"{ut.config('ip')}/"
+                                           f"{ut.config('bot')}"))
         updater.idle()
     else:
-        print(f"File {ut.CONFIG_FILE} not found.")
+        print(f"File {ut.CONF_FILE} not found.")

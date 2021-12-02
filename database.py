@@ -4,6 +4,7 @@
 # This work is licensed under the terms of the MIT license.
 
 from contextlib import closing
+
 import sqlite3 as sql
 
 DB = 'diptico.db'

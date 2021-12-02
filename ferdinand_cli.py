@@ -104,7 +104,7 @@ def weekly(update, context):
             for ch_title in chapters:
                 msg.append(f"<b>{ch_title}\n</b>")
             url_msg = ut.url('Biblioteca de Mestionora',
-                             ut.load_config()['channel'])
+                             ut.config('channel'))
             msg.append(f"\nPuedes leerlos en la {url_msg}")
             ut.send(update, "".join(msg))
 
@@ -159,18 +159,18 @@ def shrines(update, context):
         else:
             msg = ["Puedes rezar a los dioses en los siguientes altares:\n\n",
                    ut.url("- Seguidores de Rozemyne [grupo]\n",
-                          ut.load_config()['group']),
+                          ut.config('group')),
                    ut.url("- Seguidores de Rozemyne (Spoilers) [grupo]\n",
-                          ut.load_config()['spoilers']),
+                          ut.config('spoilers')),
                    ut.url("- Biblioteca de Mestionora [canal]\n",
-                          ut.load_config()['channel']),
+                          ut.config('channel')),
                    ut.url("- Los Gutenbergs [youtube]\n",
-                          ut.load_config()['youtube']),
+                          ut.config('youtube')),
                    ut.url("- Fans de Ascendance of a Bookworm [discord]\n",
-                          ut.load_config()['discord']),
+                          ut.config('discord')),
                    ut.url("- Honzuki no Gekokujou (Myne y sus Bookworms) "
                           "LatinoFans Y más! [facebook]\n",
-                          ut.load_config()['facebook'])
+                          ut.config('facebook'))
                    ]
             ut.send(update, "".join(msg))
 
@@ -221,18 +221,18 @@ def stop(update, context):
 
 def update_db(update, context):
     uid = ut.uid(update)
-    admin = int(ut.load_config()['admin'])
+    admin = int(ut.config('admin'))
     if uid == admin:
         ut.check_index(context.job_queue)
 
 
 def publish_translation(update, context):
     uid = ut.uid(update)
-    publisher = int(ut.load_config()['publisher'])
+    publisher = int(ut.config('publisher'))
     if uid == publisher:
         titles = [line.strip() for line in " ".join(context.args).split('_')]
         channel = ut.url('Biblioteca de Mestionora',
-                         ut.load_config()['channel'])
+                         ut.config('channel'))
         db.add_mestionora(titles)
         b_titles = [f"<b>- {tit}\n</b>" for tit in titles]
         msg = (f"✨ Has recibido la bendición semanal de Mestionora ✨\n\n"

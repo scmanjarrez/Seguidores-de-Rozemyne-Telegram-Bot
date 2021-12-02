@@ -4,6 +4,7 @@
 # This work is licensed under the terms of the MIT license.
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 import database as db
 import util as ut
 
@@ -86,18 +87,17 @@ def volume_menu(update, part, volume):
 
 def shrines_menu(update):
     kb = [button_url([("👥 Seguidores de Rozemyne 👥",
-                       ut.load_config()['group'])]),
-          button_url([("👥 Seguidores de Rozemyne (Spoilers) 👥",
-                       ut.load_config()['spoilers'])]),
+                       ut.config('group'))]),
+          button_url([("👥 Salón de Eruditos (Spoilers) 👥",
+                       ut.config('spoilers'))]),
           button_url([("📢 Biblioteca de Mestionora 📢",
-                       ut.load_config()['channel'])]),
-          button_url([("🎧 Los Gutenbergs 🎧",
-                       ut.load_config()['youtube'])]),
-          button_url([("🗣 Fans de Ascendance of a Bookworm 🗣",
-                       ut.load_config()['discord'])]),
-          button_url([("👥 Honzuki no Gekokujou (Myne y sus Bookworms) "
-                       "LatinoFans Y más! 👥",
-                       ut.load_config()['facebook'])]),
+                       ut.config('channel'))]),
+          button_url([("🎧 Los Gutenbergs de Rozemyne (Youtube) 🎧",
+                       ut.config('youtube'))]),
+          button_url([("🗣 Fans de Ascendance of a Bookworm (Discord) 🗣",
+                       ut.config('discord'))]),
+          button_url([("👥 Honzuki no Gekokujou (Facebook) 👥",
+                       ut.config('facebook'))]),
           button([("« Volver al Templo", 'main_menu')])]
 
     ut.edit(update, "Altares de los Dioses", InlineKeyboardMarkup(kb))
@@ -109,7 +109,7 @@ def weekly_menu(update):
     for idx, ch_title in enumerate(chapters):
         kb.insert(idx,
                   button_url([(f"{ch_title}: 🟢",
-                               ut.load_config()['channel'])]))
+                               ut.config('channel'))]))
     ut.edit(update, "Libros Semanales", InlineKeyboardMarkup(kb))
 
 

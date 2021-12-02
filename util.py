@@ -6,6 +6,8 @@
 from telegram.error import Unauthorized, BadRequest
 from telegram.utils import helpers
 from telegram import ParseMode
+
+import configparser as cfg
 import requests as req
 import database as db
 import traceback
@@ -27,17 +29,22 @@ USERS_TO_NOTIFY = 20
 TIME_BETWEEN_NOTIFY = 2
 
 
-CONFIG_FILE = '.config'
-CONFIG = None
+CONF_FILE = '.config'
+_CONFIG = None
 
 
-def load_config():
-    global CONFIG
-    if CONFIG is None:
-        with open(CONFIG_FILE, 'r') as f:
-            CONFIG = {k: v for k, v in
-                      [line.split('=') for line in f.read().splitlines()]}
-    return CONFIG
+def _load_config():
+    global _CONFIG
+    if _CONFIG is None:
+        parser = cfg.ConfigParser()
+        parser.read(CONF_FILE)
+        _CONFIG = {k: v for section in parser.sections()
+                   for k, v in parser[section].items()}
+
+
+def config(key):
+    _load_config()
+    return _CONFIG[key]
 
 
 def blocked(uid):

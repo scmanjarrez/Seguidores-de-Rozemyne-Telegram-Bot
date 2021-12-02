@@ -1,14 +1,18 @@
-apikey=your_bot_token
-admin=your_telegram_id
-publisher=publisher_telegram_id
-group=group_url
-spoilers=spoilers_group_url
-channel=channel_url
-youtube=youtube_url
-discord=discord_url
-facebook=facebook_url
-listen=0.0.0.0
-ip=your_server_ip
-port=8443
-key=private_key.key
-cert=certificate.pem
+[webhook]
+bot = bot_token
+ip = public_ip
+listen = local_listen_address
+port = local_bind_port
+cert = certificate_pem
+
+[social]
+group = telegram_url
+spoilers = telegram_url
+channel = telegram_url
+youtube = youtube_url
+discord = discord_url
+facebook = facebook_url
+
+[settings]
+admin = telegram_uid
+publisher = telegram_uid
