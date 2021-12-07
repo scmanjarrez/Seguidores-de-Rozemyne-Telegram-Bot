@@ -229,7 +229,8 @@ def update_db(update, context):
 def publish_translation(update, context):
     uid = ut.uid(update)
     publisher = int(ut.config('publisher'))
-    if uid == publisher:
+    admin = int(ut.config('admin'))
+    if uid in (admin, publisher):
         titles = [line.strip() for line in " ".join(context.args).split('_')]
         channel = ut.url('Biblioteca de Mestionora',
                          ut.config('channel'))
