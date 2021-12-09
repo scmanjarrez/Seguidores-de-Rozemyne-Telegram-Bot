@@ -121,7 +121,8 @@ if __name__ == '__main__':
                               cert=ut.config('cert'),
                               webhook_url=(f"https://"
                                            f"{ut.config('ip')}/"
-                                           f"{ut.config('bot')}"))
+                                           f"{ut.config('bot')}")
+                              )
         updater.idle()
     else:
         print(f"File {ut.CONF_FILE} not found.")
