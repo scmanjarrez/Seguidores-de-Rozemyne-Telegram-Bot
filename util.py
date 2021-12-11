@@ -139,8 +139,6 @@ def _remove_job(queue, name):
     if current_jobs:
         for job in current_jobs:
             job.schedule_removal()
-    else:
-        print(f"No job named {name}")
 
 
 def notify_callback(context):
@@ -186,7 +184,7 @@ def scrape_chapters(part_volume_url):
     return (title_url, ended)
 
 
-def scrape_index(empty=False):
+def scrape_volumes(empty=False):
     resp = req.get(URL, headers=HEADER)
     soup = bs.BeautifulSoup(resp.text, 'lxml')
     volume_table = soup.find_all('tbody')[1]
@@ -214,12 +212,12 @@ def scrape_index(empty=False):
                 print(f"No match: {txt}")
 
 
-def check_index(queue):
+def check_volumes(queue):
     tmp = db.unfinished_part()
     if tmp is not None:
         part, volume, _, url = tmp
     else:
-        scrape_index()
+        scrape_volumes()
         part, volume, _, url = db.unfinished_part()
     cached_n_chap = db.n_chapters(part, volume)
     current_chap = db.new_chapters()
@@ -227,7 +225,7 @@ def check_index(queue):
     if ended:
         db.set_finished(part, volume)
     if cached_n_chap != len(scraped_chap):
-        _remove_job(queue, 'tuesday_hourly')
+        _remove_job(queue, 'check_hourly')
         for cur in current_chap:
             ch_part, ch_volume, ch_title = cur
             db.unset_new(ch_part, ch_volume, ch_title)
@@ -236,21 +234,20 @@ def check_index(queue):
                 db.add_chapter(part, volume, ch_title, ch_url)
 
 
-def titles_callback(context):
-    queue = context.job.context
+def volumes_callback(context):
     if db.unfinished_part() is None:
-        scrape_index()
+        scrape_volumes()
     else:
-        check_index(queue)
+        check_volumes(context.job.context)
 
 
-def tuesday_callback(context):
+def check_hourly(context):
     queue = context.job.context
-    queue.run_repeating(titles_callback, 1 * 60 * 60, 1,
-                        context=queue, name='tuesday_hourly')
+    queue.run_repeating(volumes_callback, 1 * 60 * 60, 1,
+                        context=queue, name='check_hourly')
 
 
 def check_weekly(queue):
     midnight = datetime.time(hour=0, tzinfo=pytz.timezone('Europe/Madrid'))
-    queue.run_daily(tuesday_callback, midnight, days=(1,),
-                    context=queue, name='tuesday_weekly')
+    queue.run_daily(check_hourly, midnight, days=(1,),
+                    context=queue, name='check_weekly')

@@ -107,7 +107,7 @@ if __name__ == '__main__':
     if os.path.isfile(ut.CONF_FILE):
         db.setup_db()
         if not len(db.parts()):
-            ut.scrape_index(empty=True)
+            ut.scrape_volumes(empty=True)
 
         updater = Updater(token=ut.config('bot'), use_context=True)
         dispatcher = updater.dispatcher

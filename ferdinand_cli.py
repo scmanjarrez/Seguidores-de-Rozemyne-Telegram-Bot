@@ -223,7 +223,7 @@ def update_db(update, context):
     uid = ut.uid(update)
     admin = int(ut.config('admin'))
     if uid == admin:
-        ut.check_index(context.job_queue)
+        ut.check_volumes(context.job_queue)
 
 
 def publish_translation(update, context):
