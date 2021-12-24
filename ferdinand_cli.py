@@ -226,7 +226,7 @@ def update_db(update, context):
         ut.check_volumes(context.job_queue)
 
 
-def publish_translation(update, context):
+def publish(update, context):
     uid = ut.uid(update)
     publisher = int(ut.config('publisher'))
     admin = int(ut.config('admin'))
@@ -241,3 +241,10 @@ def publish_translation(update, context):
                f"{''.join(b_titles)}\n"
                f"Puedes leerlos en la {channel}")
         ut.notify_publication(context.job_queue, msg)
+
+
+def notify(update, context):
+    uid = ut.uid(update)
+    admin = int(ut.config('admin'))
+    if uid == admin:
+        ut.notify_publication(context.job_queue, " ".join(context.args))

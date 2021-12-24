@@ -59,9 +59,13 @@ def setup_handlers(dispatch, job_queue):
                                     filters=~Filters.update.edited_message)
     dispatch.add_handler(scrape_handler)
 
-    publish_handler = CommandHandler('publicar', cli.publish_translation,
+    publish_handler = CommandHandler('publicar', cli.publish,
                                      filters=~Filters.update.edited_message)
     dispatch.add_handler(publish_handler)
+
+    notify_handler = CommandHandler('notificar', cli.notify,
+                                    filters=~Filters.update.edited_message)
+    dispatch.add_handler(notify_handler)
 
     start_handler = CommandHandler('start', cli.start,
                                    filters=~Filters.update.edited_message)
