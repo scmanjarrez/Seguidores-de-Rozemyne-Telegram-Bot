@@ -43,7 +43,7 @@ def button_handler(update, context):
         elif query.data == 'weekly_menu':
             gui.weekly_menu(update)
         elif query.data == 'notifications_menu':
-            gui.notifications_menu(update, context)
+            gui.notifications_menu(update)
         elif query.data == 'notification_toggle':
             gui.notification_toggle(update)
 

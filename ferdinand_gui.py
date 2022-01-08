@@ -113,7 +113,7 @@ def weekly_menu(update):
     ut.edit(update, "Libros Semanales", InlineKeyboardMarkup(kb))
 
 
-def notifications_menu(update, context):
+def notifications_menu(update):
     uid = update.effective_message.chat.id
     kb = [button([("« Volver al Templo", 'main_menu')])]
     tit = "Ordonnanz"
