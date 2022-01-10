@@ -53,6 +53,14 @@ def parts():
             return cur.fetchall()
 
 
+def name_part(part):
+    with closing(sql.connect(DB)) as db:
+        with closing(db.cursor()) as cur:
+            cur.execute('SELECT DISTINCT(title) FROM parts WHERE part = ?',
+                        [part])
+            return cur.fetchone()[0]
+
+
 def total_parts():
     with closing(sql.connect(DB)) as db:
         with closing(db.cursor()) as cur:

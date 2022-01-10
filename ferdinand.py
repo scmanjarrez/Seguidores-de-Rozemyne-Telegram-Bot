@@ -43,15 +43,15 @@ def button_handler(update, context):
         elif query.data == 'weekly_menu':
             gui.weekly_menu(update)
         elif query.data == 'notifications_menu':
-            gui.notifications_menu(update)
+            gui.notifications_menu(update, context)
         elif query.data == 'notification_toggle':
-            gui.notification_toggle(update)
+            gui.notification_toggle(update, context)
 
 
 def setup_handlers(dispatch, job_queue):
-    new_member_handler = MessageHandler(Filters.status_update.new_chat_members,
-                                        ut.new_member)
-    dispatch.add_handler(new_member_handler)
+    status_update_handler = MessageHandler(Filters.status_update,
+                                           ut.status_update)
+    dispatch.add_handler(status_update_handler)
 
     dispatch.add_handler(CallbackQueryHandler(button_handler))
 

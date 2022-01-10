@@ -9,21 +9,6 @@ import database as db
 import util as ut
 
 
-def _floor_name(part):
-    name = "Sótano"
-    if part == '1':
-        name = "Primer Piso"
-    elif part == '2':
-        name = "Segundo Piso"
-    elif part == '3':
-        name = "Tercer Piso"
-    elif part == '4':
-        name = "Cuarto Piso"
-    elif part == '5':
-        name = "Quinto Piso"
-    return name
-
-
 def button(buttons):
     return [InlineKeyboardButton(bt[0], callback_data=bt[1]) for bt in buttons]
 
@@ -34,7 +19,7 @@ def button_url(buttons):
 
 def button_redirect(bot, command):
     return InlineKeyboardMarkup(
-        [button_url([("Usar herramienta inhibidora de sonido",
+        [button_url([("➡ Pulsa para usar herramienta inhibidora de sonido ⬅",
                       ut.deeplink(bot, command))])])
 
 
@@ -72,16 +57,17 @@ def part_menu(update, part):
     for idx, (volume,) in enumerate(volumes):
         kb.insert(idx,
                   button([(f"Volúmen {volume}", f'volume_{part}_{volume}')]))
-    ut.edit(update, _floor_name(part), InlineKeyboardMarkup(kb))
+    ut.edit(update, f"Parte {part}: {db.name_part(part)}",
+            InlineKeyboardMarkup(kb))
 
 
 def volume_menu(update, part, volume):
-    kb = [button([(f"« Volver al {_floor_name(part)}", f'part_{part}'),
+    kb = [button([(f"« Volver a la Parte {part}", f'part_{part}'),
                   ("« Volver al Templo", 'main_menu')])]
     chapters = db.chapters(part, volume)
     for idx, (ch_title, ch_url) in enumerate(chapters):
         kb.insert(idx, button_url([(f"{ch_title}", ch_url)]))
-    ut.edit(update, f"Parte {part}: Volúmen {volume}",
+    ut.edit(update, f"Parte {part}: {db.name_part(part)}, volúmen {volume}",
             InlineKeyboardMarkup(kb))
 
 
@@ -99,7 +85,6 @@ def shrines_menu(update):
           button_url([("👥 Honzuki no Gekokujou (Facebook) 👥",
                        ut.config('facebook'))]),
           button([("« Volver al Templo", 'main_menu')])]
-
     ut.edit(update, "Altares de los Dioses", InlineKeyboardMarkup(kb))
 
 
@@ -113,12 +98,13 @@ def weekly_menu(update):
     ut.edit(update, "Libros Semanales", InlineKeyboardMarkup(kb))
 
 
-def notifications_menu(update):
+def notifications_menu(update, context):
     uid = update.effective_message.chat.id
     kb = [button([("« Volver al Templo", 'main_menu')])]
     tit = "Ordonnanz"
     if not ut.is_group(uid) or (ut.is_group(uid) and
-                                ut.is_admin(update, context, callback=True)):
+                                ut.is_admin(update, context,
+                                            callback=True)):
         notification_icon = '🔔' if db.notifications(uid) == 1 else '🔕'
         kb.insert(0,
                   button([(f"Recibir Ordonnanz: {notification_icon}",
@@ -128,7 +114,7 @@ def notifications_menu(update):
     ut.edit(update, tit, InlineKeyboardMarkup(kb))
 
 
-def notification_toggle(update):
+def notification_toggle(update, context):
     uid = update.effective_message.chat.id
     db.toggle_notifications(uid)
-    notifications_menu(update)
+    notifications_menu(update, context)

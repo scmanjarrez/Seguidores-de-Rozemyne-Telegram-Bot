@@ -27,6 +27,7 @@ HEADER = {
 TITLE = re.compile(r'Parte (\d+) – ([\w\s]+) ([IVX]+)')
 USERS_TO_NOTIFY = 20
 TIME_BETWEEN_NOTIFY = 2
+TIME_CLEAN_MSG = 2 * 60
 
 
 CONF_FILE = '.config'
@@ -72,16 +73,18 @@ def is_admin(update, context, callback=False):
 
 def send(update, msg, quote=True, reply_markup=None, disable_preview=True):
     try:
-        update.message.reply_html(msg, quote=quote, reply_markup=reply_markup,
-                                  disable_web_page_preview=disable_preview)
+        return update.message.reply_html(
+            msg, quote=quote, reply_markup=reply_markup,
+            disable_web_page_preview=disable_preview)
     except Unauthorized:
         blocked(update.effective_message.chat.id)
 
 
 def send_bot(bot, uid, msg, reply_markup=None, disable_preview=True):
     try:
-        bot.send_message(uid, msg, ParseMode.HTML, reply_markup=reply_markup,
-                         disable_web_page_preview=disable_preview)
+        return bot.send_message(
+            uid, msg, ParseMode.HTML, reply_markup=reply_markup,
+            disable_web_page_preview=disable_preview)
     except Unauthorized:
         blocked(uid)
 
@@ -100,7 +103,7 @@ def edit(update, msg, reply_markup, disable_preview=True):
 
 def _msg_start(update):
     uid = update.effective_message.chat.id
-    if uid < 0:
+    if is_group(uid):
         msg = ("Solicita que se anexe tu provincia a Ehrenfest "
                "con /start antes de continuar.")
     else:
@@ -119,19 +122,40 @@ def not_started_gui(update):
     edit(update, msg, None)
 
 
-def new_member(update, context):
-    new = []
-    for member in update.message.new_chat_members:  # will I get more than one?
-        new.append(url(member['first_name'], f"tg://user?id={member['id']}"))
-    if len(new) == 1:
-        msg = (f"Bienvenido al templo {', '.join(new)}. "
-               f"A partir de este momento, "
-               f"eres reconocido como un noble de Ehrenfest.")
-    else:
-        msg = (f"Bienvenidos al templo {', '.join(new)}. "
-               f"A partir de este momento, "
-               f"sois reconocidos como nobles de Ehrenfest.")
-    send(update, msg)
+def delete(bot, cid, mid):
+    try:
+        bot.delete_message(cid, mid)
+    except BadRequest:
+        send_bot(bot, int(config('admin')),
+                 "No tengo permisos para borrar mensajes en el grupo.")
+
+
+def clean_old_messages(context):
+    cid, mids = context.job.context
+    for mid in mids:
+        delete(context.bot, cid, mid)
+
+
+def schedule_delete(queue, cid, mids):
+    queue.run_once(
+        clean_old_messages, TIME_CLEAN_MSG,
+        context=(cid, mids))
+
+
+def antiflood(update, context, sent):
+    schedule_delete(context.job_queue, uid(update),
+                    (update.message.message_id, sent.message_id))
+
+
+def status_update(update, context):
+    cid = uid(update)
+    mid = update.message.message_id
+    for member in update.message.new_chat_members:
+        mention = url(member['first_name'], f"tg://user?id={member['id']}")
+        msg = (f"Rezamos para que Dregarnuhr, la Diosa del Tiempo, "
+               f"teja fuertemente los hilos de nuestro destino, {mention}. ")
+        send(update, msg, quote=False)
+    delete(context.bot, cid, mid)
 
 
 def _remove_job(queue, name):

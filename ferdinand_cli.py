@@ -50,9 +50,10 @@ VOLUME = {
 }
 
 
-def _redirect(bot, cid, command):
-    ut.send_bot(bot, cid, GROUP,
-                reply_markup=gui.button_redirect(bot, command))
+def _redirect(update, context, command):
+    sent = ut.send_bot(context.bot, ut.uid(update), GROUP,
+                       reply_markup=gui.button_redirect(context.bot, command))
+    ut.antiflood(update, context, sent)
 
 
 def start(update, context):
@@ -76,7 +77,9 @@ def start(update, context):
             fname = update.effective_message.chat.title
             msg = (f"La provincia <b><i>{fname}</i></b> "
                    f"se ha incorporado a Ehrenfest.\n\n{HELP}")
-        ut.send(update, msg)
+        sent = ut.send(update, msg)
+        if ut.is_group(uid):
+            ut.antiflood(update, context, sent)
     else:
         if not db.cached(uid):
             db.add_user(uid)
@@ -97,7 +100,7 @@ def weekly(update, context):
         ut.not_started(update)
     else:
         if ut.is_group(uid):
-            _redirect(context.bot, uid, "deep_week")
+            _redirect(update, context, "deep_week")
         else:
             msg = ["Los libros que se imprimirán esta semana son:\n\n"]
             chapters = db.mestionora_chapters()
@@ -115,7 +118,7 @@ def library(update, context):
         ut.not_started(update)
     else:
         if ut.is_group(uid):
-            _redirect(context.bot, uid, "deep_lib")
+            _redirect(update, context, "deep_lib")
         else:
             msg = ["Las estanterías que hay en la biblioteca son:\n"]
             parts = db.parts()
@@ -130,7 +133,7 @@ def bookshelf(update, context):
         ut.not_started(update)
     else:
         if ut.is_group(uid):
-            _redirect(context.bot, uid, f"deep_book-{'-'.join(context.args)}")
+            _redirect(update, context, f"deep_book-{'-'.join(context.args)}")
         else:
             msg = ["Es necesario que me digas "
                    "la parte y el volúmen que quieras revisar. "
@@ -155,7 +158,7 @@ def shrines(update, context):
         ut.not_started(update)
     else:
         if ut.is_group(uid):
-            _redirect(context.bot, uid, "deep_sh")
+            _redirect(update, context, "deep_sh")
         else:
             msg = ["Puedes rezar a los dioses en los siguientes altares:\n\n",
                    ut.url("- Seguidores de Rozemyne [grupo]\n",
@@ -186,13 +189,15 @@ def ordonnanz(update, context):
             db.toggle_notifications(uid)
             if db.notifications(uid) == 1:
                 msg = (f"Se {'' if ut.is_group(uid) else 'te '}"
-                       f"enviará una Ordonnanz cada vez "
+                       f"enviará una ordonnanz cada vez "
                        f"que se imprima un nuevo libro.")
 
             else:
                 msg = (f"Ya no se {'' if ut.is_group(uid) else 'te '}"
-                       f"enviarán más Ordonnanz.")
-        ut.send(update, msg)
+                       f"enviarán más ordonnanz.")
+        sent = ut.send(update, msg)
+        if ut.is_group(uid):
+            ut.antiflood(update, context, sent)
 
 
 def bot_help(update, context):
@@ -200,7 +205,9 @@ def bot_help(update, context):
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        ut.send(update, HELP)
+        sent = ut.send(update, HELP)
+        if ut.is_group(uid):
+            ut.antiflood(update, context, sent)
 
 
 def stop(update, context):
