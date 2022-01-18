@@ -126,8 +126,7 @@ def delete(bot, cid, mid):
     try:
         bot.delete_message(cid, mid)
     except BadRequest:
-        send_bot(bot, int(config('admin')),
-                 "No tengo permisos para borrar mensajes en el grupo.")
+        pass
 
 
 def clean_old_messages(context):
