@@ -13,7 +13,7 @@ import ferdinand_cli as cli
 import ferdinand_gui as gui
 import database as db
 import logging as log
-import util as ut
+import utils as ut
 import os
 
 

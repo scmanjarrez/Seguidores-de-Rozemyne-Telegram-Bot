@@ -5,7 +5,7 @@
 
 import ferdinand_gui as gui
 import database as db
-import util as ut
+import utils as ut
 
 
 HELP = (
