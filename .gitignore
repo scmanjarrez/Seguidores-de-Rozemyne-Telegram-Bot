@@ -1,6 +1,6 @@
 # Custom
 server/
-.config
+.*
 diptico.db
 diptico.sql
 
