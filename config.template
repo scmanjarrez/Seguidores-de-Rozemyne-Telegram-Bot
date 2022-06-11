@@ -8,6 +8,7 @@ cert = certificate_pem
 [social]
 group = telegram_url
 spoilers = telegram_url
+pdfs = pdfs_recap_url
 channel = telegram_url
 youtube = youtube_url
 discord = discord_url

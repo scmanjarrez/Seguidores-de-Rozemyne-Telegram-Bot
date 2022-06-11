@@ -32,7 +32,8 @@ def menu(update, context):
 
 
 def main_menu(update):
-    kb = [button([("📚 Biblioteca 📚", 'library_menu')]),
+    kb = [button([("🏛 Biblioteca 🏛", 'library_menu')]),
+          button([("📚 Anuario 📚", 'yearbook_menu')]),
           button([("🙏 Altares a los Dioses 🙏", 'shrines_menu')]),
           button([("📆 Libros Semanales 📆", 'weekly_menu')]),
           button([("🕊 Ordonnanz 🕊", 'notifications_menu')])]
@@ -68,6 +69,26 @@ def volume_menu(update, part, volume):
     for idx, (ch_title, ch_url) in enumerate(chapters):
         kb.insert(idx, button_url([(f"{ch_title}", ch_url)]))
     ut.edit(update, f"Parte {part}: {db.name_part(part)}, volúmen {volume}",
+            InlineKeyboardMarkup(kb))
+
+
+def yearbook_menu(update):
+    kb = [button([("« Volver al Templo", 'main_menu')])]
+    parts = db.total_pdfs()
+    for idx, (part, title) in enumerate(parts):
+        kb.insert(idx, button([(f"Parte {part}: {title}", f'ybook_{part}')]))
+    ut.edit(update, "Anuario", InlineKeyboardMarkup(kb))
+
+
+def ybook_menu(update, part):
+    kb = [button([("« Volver al Anuario", 'yearbook_menu'),
+                  ("« Volver al Templo", 'main_menu')])]
+    volumes = db.total_pdf_volumes(part)
+    for idx, (volume,) in enumerate(volumes):
+        kb.insert(idx,
+                  button_url(
+                      [(f"Volúmen {volume}", db.pdf_url(part, volume))]))
+    ut.edit(update, f"Parte {part}: {db.name_part(part)}",
             InlineKeyboardMarkup(kb))
 
 

@@ -15,14 +15,16 @@ HELP = (
     "❔ /menu - Interactúa con el bot mediante botones. <b>[beta]</b>"
     "\n\n"
 
-    "❔ /semanal - Libros que se imprimen cada semana."
-    "\n"
     "❔ /biblioteca - Lista de libros en la biblioteca."
     "\n"
     "❔ /estanteria <code>&lt;parte&gt; &lt;volúmen&gt;</code> - "
     "Lista de libros en la estantería."
     "\n"
+    "❔ /anuarios - Lista de libros en la biblioteca (PDF)."
+    "\n"
     "❔ /altares - Lista de altares a los dioses."
+    "\n"
+    "❔ /semanal - Libros que se imprimen cada semana."
     "\n"
     "❔ /ordonnanz - Permite/prohíbe el envío de ordonnanz."
     "\n\n"
@@ -87,6 +89,8 @@ def start(update, context):
             weekly(update, context)
         elif context.args[0] == 'deep_lib':
             library(update, context)
+        elif context.args[0] == 'deep_ybook':
+            yearbook(update, context)
         elif context.args[0].startswith('deep_book'):
             context.args = context.args[0].split('-')[1:]
             bookshelf(update, context)
@@ -122,6 +126,22 @@ def library(update, context):
         else:
             msg = ["Las estanterías que hay en la biblioteca son:\n"]
             parts = db.parts()
+            for part, volume, title, url in parts:
+                msg.append(ut.url(f"Parte {part}: {title} {volume}", url))
+            ut.send(update, "\n".join(msg))
+
+
+def yearbook(update, context):
+    uid = ut.uid(update)
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        if ut.is_group(uid):
+            _redirect(update, context, "deep_ybook")
+        else:
+            yearbooks = ut.url('anuarios', ut.config('pdfs'))
+            msg = [f"Estos son los {yearbooks} que tenemos disponibles:\n"]
+            parts = db.pdfs()
             for part, volume, title, url in parts:
                 msg.append(ut.url(f"Parte {part}: {title} {volume}", url))
             ut.send(update, "\n".join(msg))
