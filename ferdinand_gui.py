@@ -113,9 +113,13 @@ def weekly_menu(update):
     kb = [button([("« Volver al Templo", 'main_menu')])]
     chapters = db.mestionora_chapters()
     for idx, ch_title in enumerate(chapters):
-        kb.insert(idx,
-                  button_url([(f"{ch_title}: 🟢",
-                               ut.config('channel'))]))
+        if not ch_title.startswith('+'):
+            kb.insert(idx,
+                      button_url([(f"{ch_title}",
+                                   ut.config('channel'))]))
+        else:
+            kb.insert(idx,
+                      button([(f"📖 {ch_title[1:]} 📖", 'nop')]))
     ut.edit(update, "Libros Semanales", InlineKeyboardMarkup(kb))
 
 
