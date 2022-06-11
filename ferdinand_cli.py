@@ -259,12 +259,18 @@ def publish(update, context):
     admin = int(ut.config('admin'))
     if uid in (admin, publisher):
         titles = [line.strip() for line in " ".join(context.args).split('_')]
+        multi = any(el.startswith('+') for el in titles)
+        sep = "\n" if multi else "\n\n"
+        st = "" if multi else "<b>"
+        en = "" if multi else "</b>"
         channel = ut.url('Biblioteca de Mestionora',
                          ut.config('channel'))
         db.add_mestionora(titles)
-        b_titles = [f"<b>- {tit}\n</b>" for tit in titles]
+        b_titles = [f"- {st}<i>{tit}</i>{en}\n" if not tit.startswith('+')
+                    else f"\n<b>{tit[1:]}:</b>\n"
+                    for tit in titles]
         msg = (f"✨ Has recibido la bendición semanal de Mestionora ✨\n\n"
-               f"Los libros que se imprimirán esta semana son:\n\n"
+               f"Los libros que se imprimirán esta semana son:{sep}"
                f"{''.join(b_titles)}\n"
                f"Puedes leerlos en la {channel}")
         ut.notify_publication(context.job_queue, msg)
