@@ -127,6 +127,8 @@ def delete(bot, cid, mid):
         bot.delete_message(cid, mid)
     except BadRequest:
         pass
+    except Unauthorized:
+        blocked(cid)
 
 
 def clean_old_messages(context):
