@@ -24,7 +24,7 @@ def button_redirect(bot, command):
 
 
 def menu(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     if not db.cached(uid):
         ut.not_started(update)
     else:
@@ -124,7 +124,7 @@ def weekly_menu(update):
 
 
 def notifications_menu(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     kb = [button([("« Volver al Templo", 'main_menu')])]
     tit = "Ordonnanz"
     if not ut.is_group(uid) or (ut.is_group(uid) and
@@ -140,6 +140,6 @@ def notifications_menu(update, context):
 
 
 def notification_toggle(update, context):
-    uid = update.effective_message.chat.id
+    uid = ut.uid(update)
     db.toggle_notifications(uid)
     notifications_menu(update, context)
