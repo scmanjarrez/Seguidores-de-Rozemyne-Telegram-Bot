@@ -27,7 +27,7 @@ HEADER = {
 TITLE = re.compile(r'Parte (\d+) – ([\w\s]+) ([IVX]+)')
 USERS_TO_NOTIFY = 20
 TIME_BETWEEN_NOTIFY = 2
-TIME_CLEAN_MSG = 2 * 60
+TIME_CLEAN_MSG = 10 * 60
 
 
 CONF_FILE = '.config'
