@@ -36,4 +36,4 @@ accesible desde [@ordonnanz\_bot](https://t.me/ordonnanz_bot).
     This work is licensed under the terms of the MIT license.
 
 Puedes encontrar la licencia completa en
-[LICENSE](https://github.com/scmanjarrez/ordonnanz/blob/master/LICENSE).
+[LICENSE](LICENSE).
