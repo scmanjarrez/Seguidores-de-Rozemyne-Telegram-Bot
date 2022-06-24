@@ -12,7 +12,7 @@ HELP = (
     "Esto es lo que puedo hacer por ti:"
     "\n\n"
 
-    "❔ /menu - Interactúa con el bot mediante botones. <b>[beta]</b>"
+    "❔ /menu - Interactúa con el bot mediante botones."
     "\n\n"
 
     "❔ /biblioteca - Lista de libros en la biblioteca."
@@ -21,6 +21,8 @@ HELP = (
     "Lista de libros en la estantería."
     "\n"
     "❔ /anuarios - Lista de libros en la biblioteca (PDF)."
+    "\n"
+    "❔ /archivos - Archivos del sótano (WebNovel)."
     "\n"
     "❔ /altares - Lista de altares a los dioses."
     "\n"
@@ -136,15 +138,20 @@ def yearbook(update, context):
     if not db.cached(uid):
         ut.not_started(update)
     else:
-        if ut.is_group(uid):
-            _redirect(update, context, "deep_ybook")
-        else:
-            yearbooks = ut.url('anuarios', ut.config('pdfs'))
-            msg = [f"Estos son los {yearbooks} que tenemos disponibles:\n"]
-            parts = db.pdfs()
-            for part, volume, title, url in parts:
-                msg.append(ut.url(f"Parte {part}: {title} {volume}", url))
-            ut.send(update, "\n".join(msg))
+        yearbooks = ut.url('anuarios', ut.config('pdfs'))
+        ut.send(update,
+                f"Aquí puedes encontrar los {yearbooks} (PDFs).")
+
+
+def archive(update, context):
+    uid = ut.uid(update)
+    if not db.cached(uid):
+        ut.not_started(update)
+    else:
+        archive = ut.url('archivos', ut.config('webnovel'))
+        ut.send(update,
+                f"Aquí puedes encontrar los {archive} "
+                f"del sótano (WebNovel).")
 
 
 def bookshelf(update, context):

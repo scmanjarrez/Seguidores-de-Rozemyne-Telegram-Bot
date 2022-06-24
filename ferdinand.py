@@ -38,11 +38,6 @@ def button_handler(update, context):
         elif query.data.startswith('volume_'):
             args = query.data.split('_')
             gui.volume_menu(update, args[1], args[2])
-        elif query.data == 'yearbook_menu':
-            gui.yearbook_menu(update)
-        elif query.data.startswith('ybook_'):
-            args = query.data.split('_')
-            gui.ybook_menu(update, args[1])
         elif query.data == 'shrines_menu':
             gui.shrines_menu(update)
         elif query.data == 'weekly_menu':
@@ -92,6 +87,10 @@ def setup_handlers(dispatch, job_queue):
                                       filters=~Filters.update.edited_message)
     dispatch.add_handler(yearbook_handler)
 
+    archive_handler = CommandHandler('archivos', cli.archive,
+                                     filters=~Filters.update.edited_message)
+    dispatch.add_handler(archive_handler)
+
     bookshelf_handler = CommandHandler('estanteria', cli.bookshelf,
                                        filters=~Filters.update.edited_message)
     dispatch.add_handler(bookshelf_handler)
@@ -136,6 +135,7 @@ if __name__ == '__main__':
                                            f"{ut.config('ip')}/"
                                            f"{ut.config('bot')}")
                               )
+        # updater.start_polling()
         updater.idle()
     else:
         print(f"File {ut.CONF_FILE} not found.")

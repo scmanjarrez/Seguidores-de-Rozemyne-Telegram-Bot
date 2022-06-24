@@ -9,6 +9,7 @@ cert = certificate_pem
 group = telegram_url
 spoilers = telegram_url
 pdfs = pdfs_recap_url
+webnovel = webnovel_url
 channel = telegram_url
 youtube = youtube_url
 discord = discord_url

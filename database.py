@@ -24,14 +24,6 @@ def setup_db():
                     PRIMARY KEY (part, volume)
                 );
 
-                CREATE TABLE IF NOT EXISTS pdfs (
-                    part INTEGER,
-                    volume INTEGER,
-                    title TEXT,
-                    url TEXT,
-                    PRIMARY KEY (part, volume)
-                );
-
                 CREATE TABLE IF NOT EXISTS chapters (
                     part INTEGER,
                     volume INTEGER,
@@ -63,15 +55,6 @@ def parts():
             return cur.fetchall()
 
 
-def pdfs():
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute(
-                'SELECT part, volume, title, url '
-                'FROM pdfs')
-            return cur.fetchall()
-
-
 def name_part(part):
     with closing(sql.connect(DB)) as db:
         with closing(db.cursor()) as cur:
@@ -89,19 +72,6 @@ def total_parts():
             cur.execute(
                 'SELECT part, title '
                 'FROM parts '
-                'ORDER BY rowid')
-            ret = cur.fetchall()
-            group = [[(p, t) for p, t in ret if p == r]
-                     for r in range(1, ret[-1][0] + 1)]
-            return [max(set(g), key=g.count) for g in group]
-
-
-def total_pdfs():
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute(
-                'SELECT part, title '
-                'FROM pdfs '
                 'ORDER BY rowid')
             ret = cur.fetchall()
             group = [[(p, t) for p, t in ret if p == r]
@@ -139,30 +109,6 @@ def total_volumes(part):
                 'ORDER BY rowid',
                 [part])
             return cur.fetchall()
-
-
-def total_pdf_volumes(part):
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute(
-                'SELECT volume '
-                'FROM pdfs '
-                'WHERE part = ? '
-                'ORDER BY rowid',
-                [part])
-            return cur.fetchall()
-
-
-def pdf_url(part, volume):
-    with closing(sql.connect(DB)) as db:
-        with closing(db.cursor()) as cur:
-            cur.execute(
-                'SELECT url '
-                'FROM pdfs '
-                'WHERE part = ? AND volume = ? '
-                'ORDER BY rowid',
-                [part, volume])
-            return cur.fetchone()[0]
 
 
 def unfinished_part():
